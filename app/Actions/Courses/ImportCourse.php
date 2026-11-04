@@ -4,12 +4,16 @@ namespace App\Actions\Courses;
 
 use App\Models\Course;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ImportCourse
 {
-    public function __construct(private ParseMarkdownCourse $parseMarkdownCourse) {}
+    public function __construct(
+        private ParseMarkdownCourse $parseMarkdownCourse,
+        private LinkImportedLessons $linkImportedLessons,
+    ) {}
 
     /**
      * Create a course and its lessons from markdown files, all or nothing.
@@ -35,10 +39,20 @@ class ImportCourse
             ]);
 
             $position = 0;
+            $lessonsByPath = [];
 
-            foreach ($parsedCourse['lessons'] as $lesson) {
-                $course->lessons()->create([...$lesson, 'position' => ++$position]);
+            foreach ($parsedCourse['lessons'] as $parsedLesson) {
+                $lesson = $course->lessons()->create([
+                    ...Arr::except($parsedLesson, 'source_path'),
+                    'position' => ++$position,
+                ]);
+
+                if (isset($parsedLesson['source_path'])) {
+                    $lessonsByPath[$parsedLesson['source_path']] = $lesson;
+                }
             }
+
+            $this->linkImportedLessons->handle($course, $lessonsByPath);
 
             return $course;
         });

@@ -137,6 +137,52 @@ class ImportCourseTest extends TestCase
         $this->assertSame(['A', 'C'], $user->courses()->sole()->lessons()->orderBy('position')->pluck('title')->all());
     }
 
+    public function test_links_between_imported_files_point_to_their_lessons(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('courses.import.store'), [
+            'title' => 'Linked',
+            'files' => [
+                ['path' => 'examples/mini-lab/README.md', 'content' => "# Mini lab\n\nSee [lesson 09](../../notes/09-serverless.md)."],
+                ['path' => 'notes/09-serverless.md', 'content' => "# Serverless\n\nNext [intro](./00%20intro.md#start \"Intro\") and [lab](../examples/mini-lab/README.md)."],
+                ['path' => 'notes/00 intro.md', 'content' => "# Intro\n\nBody"],
+            ],
+        ]);
+
+        $course = $user->courses()->sole();
+        $miniLab = $course->lessons()->where('title', 'Mini lab')->sole();
+        $serverless = $course->lessons()->where('title', 'Serverless')->sole();
+        $intro = $course->lessons()->where('title', 'Intro')->sole();
+
+        $this->assertSame("See [lesson 09](/courses/{$course->id}/lessons/{$serverless->id}).", $miniLab->content);
+        $this->assertSame(
+            "Next [intro](/courses/{$course->id}/lessons/{$intro->id}#start) and [lab](/courses/{$course->id}/lessons/{$miniLab->id}).",
+            $serverless->content,
+        );
+    }
+
+    public function test_links_that_are_code_or_leave_the_import_stay_unchanged(): void
+    {
+        $user = User::factory()->create();
+        $content = implode("\n", [
+            '[outside](../missing.md) [site](https://example.com/b.md) [anchor](#top) `[inline](b.md)`',
+            '```markdown',
+            '[fenced](b.md)',
+            '```',
+        ]);
+
+        $this->actingAs($user)->post(route('courses.import.store'), [
+            'title' => 'Unchanged',
+            'files' => [
+                ['path' => 'a.md', 'content' => "# A\n\n{$content}"],
+                ['path' => 'b.md', 'content' => "# B\n\nBody"],
+            ],
+        ]);
+
+        $this->assertSame($content, $user->courses()->sole()->lessons()->where('title', 'A')->sole()->content);
+    }
+
     public function test_import_of_only_empty_files_creates_nothing(): void
     {
         $this->actingAs(User::factory()->create())

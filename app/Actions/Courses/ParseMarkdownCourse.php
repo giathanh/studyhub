@@ -18,7 +18,7 @@ class ParseMarkdownCourse
      * the first H2 describes it, and each H2 becomes a lesson.
      *
      * @param  list<array{path: string, content: ?string}>  $files
-     * @return array{title: ?string, description: ?string, lessons: list<array{section: ?string, title: string, content: ?string}>}
+     * @return array{title: ?string, description: ?string, lessons: list<array{section: ?string, title: string, content: ?string, source_path?: string}>}
      */
     public function handle(array $files): array
     {
@@ -73,7 +73,7 @@ class ParseMarkdownCourse
 
     /**
      * @param  array{path: string, content: string}  $document
-     * @return array{section: ?string, title: string, content: ?string}
+     * @return array{section: ?string, title: string, content: ?string, source_path: string}
      */
     private function parseLessonFile(array $document): array
     {
@@ -83,6 +83,7 @@ class ParseMarkdownCourse
             'section' => $this->sectionFromPath($document['path']),
             'title' => $title ?? $this->titleFromPath($document['path']),
             'content' => $this->nullIfBlank($body),
+            'source_path' => $document['path'],
         ];
     }
 
