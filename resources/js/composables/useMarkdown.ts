@@ -3,6 +3,7 @@ export interface InlineToken {
     type: 'text' | 'code' | 'strong' | 'em' | 'link' | 'unsafe_link';
     text: string;
     href?: string;
+    children?: InlineToken[];
 }
 
 export interface MarkdownListItem {
@@ -50,63 +51,75 @@ export function sanitizeMarkdownUrl(rawUrl: string): string | null {
     }
 }
 
+const inlinePattern =
+    /\\(?<escaped>[!-/:-@[-`{-~])|(?<entity>&(?:amp|lt|gt|quot|nbsp|#39);)|`(?<code>[^`]+)`|\[(?<label>[^\]]+)\]\((?<href>[^)]+)\)|\*\*(?<strong>(?:[^*]|\*[^*]+\*)+)\*\*|\*(?<em>(?:[^*]|\*\*[^*]+\*\*)+)\*|(?<![\p{L}\p{N}_])__(?<underscoreStrong>[^_\s](?:[^_]*[^_\s])?)__(?![\p{L}\p{N}_])|(?<![\p{L}\p{N}_])_(?<underscoreEm>[^_\s](?:[^_]*[^_\s])?)_(?![\p{L}\p{N}_])/gu;
+
+const htmlEntities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&nbsp;': '\u00A0',
+};
+
+function plainText(tokens: InlineToken[]): string {
+    return tokens.map((token) => token.text).join('');
+}
+
 export function parseInlineMarkdown(text: string, prefix: string): InlineToken[] {
     const tokens: InlineToken[] = [];
-    const pattern = /(`[^`]+`)|(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)/g;
     let lastIndex = 0;
     let partCounter = 0;
-    let match: RegExpExecArray | null = pattern.exec(text);
 
-    while (match !== null) {
-        if (match.index > lastIndex) {
-            tokens.push({
-                id: `${prefix}-t-${partCounter++}`,
-                type: 'text',
-                text: text.slice(lastIndex, match.index),
-            });
+    const pushText = (value: string): void => {
+        const previous = tokens.at(-1);
+
+        if (previous?.type === 'text') {
+            previous.text += value;
+        } else if (value !== '') {
+            tokens.push({ id: `${prefix}-t-${partCounter++}`, type: 'text', text: value });
         }
+    };
 
-        if (match[1] !== undefined) {
-            tokens.push({
-                id: `${prefix}-c-${partCounter++}`,
-                type: 'code',
-                text: match[1].slice(1, -1),
-            });
-        } else if (match[2] !== undefined) {
-            const label = match[3];
-            const safeHref = sanitizeMarkdownUrl(match[4]);
+    const pushFormatted = (type: 'strong' | 'em', content: string): void => {
+        const id = `${prefix}-${type === 'strong' ? 'b' : 'i'}-${partCounter++}`;
+        const children = parseInlineMarkdown(content, id);
+
+        tokens.push({ id, type, text: plainText(children), children });
+    };
+
+    for (const match of text.matchAll(inlinePattern)) {
+        const groups = match.groups ?? {};
+        pushText(text.slice(lastIndex, match.index));
+        lastIndex = match.index + match[0].length;
+
+        if (groups.escaped !== undefined) {
+            pushText(groups.escaped);
+        } else if (groups.entity !== undefined) {
+            pushText(htmlEntities[groups.entity]);
+        } else if (groups.code !== undefined) {
+            tokens.push({ id: `${prefix}-c-${partCounter++}`, type: 'code', text: groups.code });
+        } else if (groups.label !== undefined) {
+            const id = `${prefix}-l-${partCounter++}`;
+            const safeHref = sanitizeMarkdownUrl(groups.href);
+            const children = parseInlineMarkdown(groups.label, id);
 
             tokens.push({
-                id: `${prefix}-l-${partCounter++}`,
+                id,
                 type: safeHref ? 'link' : 'unsafe_link',
-                text: label,
+                text: plainText(children),
                 href: safeHref ?? undefined,
+                children,
             });
-        } else if (match[5] !== undefined) {
-            tokens.push({
-                id: `${prefix}-b-${partCounter++}`,
-                type: 'strong',
-                text: match[6],
-            });
-        } else if (match[7] !== undefined) {
-            tokens.push({
-                id: `${prefix}-i-${partCounter++}`,
-                type: 'em',
-                text: match[8],
-            });
+        } else if (groups.strong !== undefined || groups.underscoreStrong !== undefined) {
+            pushFormatted('strong', groups.strong ?? groups.underscoreStrong);
+        } else {
+            pushFormatted('em', groups.em ?? groups.underscoreEm);
         }
-
-        lastIndex = pattern.lastIndex;
-        match = pattern.exec(text);
     }
 
-    if (lastIndex < text.length) {
-        tokens.push({
-            id: `${prefix}-t-${partCounter++}`,
-            type: 'text',
-            text: text.slice(lastIndex),
-        });
-    }
+    pushText(text.slice(lastIndex));
 
     return tokens;
 }
@@ -332,4 +345,29 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
     }
 
     return blocks;
+}
+
+function renderedOutline(markdown: string): string {
+    const textOf = (tokens: InlineToken[] = []): string => plainText(tokens).replace(/\s+/g, ' ').trim();
+
+    return JSON.stringify(
+        parseMarkdownBlocks(markdown).map((block) => [
+            block.type,
+            block.level,
+            block.language,
+            block.code,
+            textOf(block.tokens),
+            block.items?.map((item) => [item.checked, textOf(item.tokens)]),
+            block.columns?.map((column) => [column.align, textOf(column.tokens)]),
+            block.rows?.map((row) => row.cells.map((cell) => textOf(cell.tokens))),
+        ]),
+    );
+}
+
+/**
+ * Whether two Markdown sources show the same blocks and text once rendered, so
+ * one can replace the other without the reader losing anything.
+ */
+export function rendersSameContent(first: string, second: string): boolean {
+    return renderedOutline(first) === renderedOutline(second);
 }

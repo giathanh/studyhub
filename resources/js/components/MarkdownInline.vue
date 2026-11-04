@@ -18,12 +18,14 @@ defineProps<{
             target="_blank"
             rel="noopener noreferrer"
             class="font-medium text-brand underline underline-offset-2 hover:text-brand-accent"
-        >{{ token.text }}</a>
+        ><MarkdownInline :tokens="token.children ?? []" /></a>
         <span v-else-if="token.type === 'unsafe_link'" class="text-gray-500">{{ token.text }}</span>
-        <strong v-else-if="token.type === 'strong'" class="font-semibold text-gray-900">{{
-            token.text
-        }}</strong>
-        <em v-else-if="token.type === 'em'" class="italic">{{ token.text }}</em>
+        <strong v-else-if="token.type === 'strong'" class="font-semibold text-gray-900">
+            <MarkdownInline :tokens="token.children ?? []" />
+        </strong>
+        <em v-else-if="token.type === 'em'" class="italic">
+            <MarkdownInline :tokens="token.children ?? []" />
+        </em>
         <template v-else>{{ token.text }}</template>
     </template>
 </template>

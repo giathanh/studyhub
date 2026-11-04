@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { TaskItem, TaskList } from '@tiptap/extension-list';
+import { TableKit } from '@tiptap/extension-table';
+import { MarkdownManager } from '@tiptap/markdown';
+import StarterKit from '@tiptap/starter-kit';
 import ts from 'typescript';
 
 const source = readFileSync(new URL('../../resources/js/composables/useMarkdown.ts', import.meta.url), 'utf8');
 const { outputText } = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 });
-const { parseMarkdownBlocks, parseInlineMarkdown, sanitizeMarkdownUrl } = await import(
+const { parseMarkdownBlocks, parseInlineMarkdown, rendersSameContent, sanitizeMarkdownUrl } = await import(
     `data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`
 );
 
@@ -81,9 +85,78 @@ test('tables and tasks keep HTML as data and block unsafe links', () => {
     assert.equal(task.tokens[0].href, undefined);
 });
 
+test('escapes and entities written by the visual editor display as plain characters', () => {
+    const tokens = parseInlineMarkdown('2 \\* 3 a\\_b &lt;div&gt; AT&amp;T C:\\Users', 'test');
+    assert.deepEqual(tokens.map((token) => token.type), ['text']);
+    assert.equal(tokens[0].text, '2 * 3 a_b <div> AT&T C:\\Users');
+    assert.equal(parseInlineMarkdown('`&lt;\\*`', 'test')[0].text, '&lt;\\*');
+    assert.equal(parseMarkdownBlocks('```\n&lt;\\*\n```')[0].code, '&lt;\\*');
+});
+
+test('inline formatting nests inside other formatting and link labels', () => {
+    const boldItalic = parseInlineMarkdown('***both***', 'test')[0];
+    assert.equal(boldItalic.type, 'strong');
+    assert.equal(boldItalic.text, 'both');
+    assert.equal(boldItalic.children[0].type, 'em');
+
+    const mixed = parseInlineMarkdown('**ab*cd*** e', 'test');
+    assert.deepEqual(mixed[0].children.map((token) => token.type), ['text', 'em']);
+    assert.equal(mixed[1].text, ' e');
+
+    assert.equal(parseInlineMarkdown('**`code`**', 'test')[0].children[0].type, 'code');
+
+    const link = parseInlineMarkdown('[**bold**](https://example.com)', 'test')[0];
+    assert.equal(link.text, 'bold');
+    assert.equal(link.children[0].type, 'strong');
+
+    const unsafe = parseInlineMarkdown('**[bad](javascript:alert)**', 'test')[0];
+    assert.equal(unsafe.children[0].type, 'unsafe_link');
+    assert.equal(unsafe.children[0].href, undefined);
+});
+
+test('underscore emphasis ignores underscores inside words', () => {
+    assert.equal(parseInlineMarkdown('_em_', 'test')[0].type, 'em');
+    assert.equal(parseInlineMarkdown('__strong__', 'test')[0].type, 'strong');
+    assert.deepEqual(parseInlineMarkdown('snake_case_name và tên_biến_mới', 'test').map((token) => token.type), ['text']);
+});
+
+test('content comparison ignores notation and catches changes a reader would see', () => {
+    assert.equal(rendersSameContent('* a\n* b\n\n_x_', '- a\n- b\n\n*x*'), true);
+    assert.equal(rendersSameContent('https://a.test', '[https://a.test](https://a.test)'), true);
+    assert.equal(rendersSameContent('| a |\n|:---|\n| 1 |', '| a   |\n| :--- |\n| 1   |\n'), true);
+    assert.equal(rendersSameContent('# a', '## a'), false);
+    assert.equal(rendersSameContent('```php\na\n```', '```\na\n```'), false);
+    assert.equal(rendersSameContent('- [ ] a', '- [x] a'), false);
+    assert.equal(rendersSameContent('![alt](https://a.test/b.png)', 'alt'), false);
+});
+
+const editorMarkdown = new MarkdownManager({
+    extensions: [StarterKit.configure({ strike: false, underline: false }), TableKit, TaskList, TaskItem],
+});
+const throughEditor = (markdown) => editorMarkdown.serialize(editorMarkdown.parse(markdown));
+
+test('Markdown saved by the visual editor renders the same as its source', () => {
+    for (const markdown of [
+        '# Title\n\nline one\nline two\n\n**b** *i* `c` [l](https://a.test) ***both***',
+        '* one\n* two\n\n1. first\n2. second\n\n- [ ] todo\n- [x] done',
+        '> quote\n> more\n\n---\n\n```php\necho "<b>";\n```',
+        '| a | b |\n| :--- | ---: |\n| `1` | **2** |',
+        'a_b_c, 2 \\* 3, AT&T and <div> as text',
+        '<b>raw</b> stays text',
+    ]) {
+        assert.equal(rendersSameContent(markdown, throughEditor(markdown)), true, markdown);
+    }
+});
+
+test('Markdown the visual editor cannot keep is detected', () => {
+    for (const markdown of ['![alt](https://a.test/b.png)', '~~gone~~']) {
+        assert.equal(rendersSameContent(markdown, throughEditor(markdown)), false, markdown);
+    }
+});
+
 async function loadMarkdownComponent(name, imports) {
     const { parse, compileScript } = await import('@vue/compiler-sfc');
-    const { descriptor } = parse(readFileSync(new URL(`../../resources/js/components/${name}.vue`, import.meta.url), 'utf8'));
+    const { descriptor } = parse(readFileSync(new URL(`../../resources/js/components/${name}.vue`, import.meta.url), 'utf8'), { filename: `${name}.vue` });
     const compiled = compileScript(descriptor, { id: name, inlineTemplate: true });
     let { outputText } = ts.transpileModule(compiled.content, {
         compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -116,4 +189,7 @@ test('Markdown component renders semantic tables and read-only task checkboxes',
     assert.match(html, /<input[^>]*type="checkbox"[^>]*disabled[^>]*aria-label="Pending"/);
     assert.match(html, /<input[^>]*type="checkbox"[^>]*checked[^>]*disabled[^>]*aria-label="Complete"/);
     assert.doesNotMatch(html, /\[ \]|\[x\]/);
+
+    const nested = await renderToString(createSSRApp(component, { content: '[**bold** link](https://a.test)' }));
+    assert.match(nested.replace(/<!--.*?-->/gs, ''), /<a[^>]*href="https:\/\/a\.test\/"[^>]*><strong[^>]*>\s*bold\s*<\/strong> link<\/a>/);
 });
