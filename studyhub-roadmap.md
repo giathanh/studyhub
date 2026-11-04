@@ -137,10 +137,10 @@ Tuần 2 làm trước phần tạo, sửa, xóa bài học vì nội dung khóa
 
 ### Tiêu chí hoàn thành
 
-- [ ] Học một bài AWS thật và lưu ghi chú bằng ứng dụng.
-- [ ] Tìm lại ghi chú và đổi trạng thái bài học được.
-- [ ] Backend từ chối liên kết ghi chú với bài hoặc khóa của người khác.
-- [ ] Nội dung Markdown không thực thi script.
+- [x] Học một bài AWS thật và lưu ghi chú bằng ứng dụng.
+- [x] Tìm lại ghi chú và đổi trạng thái bài học được.
+- [x] Backend từ chối liên kết ghi chú với bài hoặc khóa của người khác.
+- [x] Nội dung Markdown không thực thi script.
 
 ## 5. Tuần 4 — Dashboard và bản dùng hằng ngày
 

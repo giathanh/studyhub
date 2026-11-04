@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StudyStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\LessonFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['section', 'title', 'content', 'position'])]
+#[Fillable(['section', 'title', 'content', 'status', 'position', 'completed_at'])]
 class Lesson extends Model
 {
     /** @use HasFactory<LessonFactory> */
@@ -31,6 +32,21 @@ class Lesson extends Model
         return [
             'status' => StudyStatus::class,
             'completed_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Pair a status change with its matching completion timestamp.
+     *
+     * @return array{status: StudyStatus, completed_at: ?CarbonInterface}
+     */
+    public function statusAttributes(StudyStatus $status): array
+    {
+        return [
+            'status' => $status,
+            'completed_at' => $status === StudyStatus::Completed
+                ? ($this->completed_at ?? now())
+                : null,
         ];
     }
 

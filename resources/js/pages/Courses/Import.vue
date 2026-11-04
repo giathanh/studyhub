@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import FormField from '@/components/FormField.vue';
 import MagicCard from '@/components/MagicCard.vue';
 import ShimmerButton from '@/components/ShimmerButton.vue';
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 interface MarkdownFile {
@@ -27,6 +28,14 @@ const form = useForm<{
 const markdownFiles = ref<MarkdownFile[]>([]);
 const excludedGroups = ref<string[]>([]);
 const isReadingFiles = ref(false);
+
+useUnsavedChanges(
+    () =>
+        markdownFiles.value.length > 0 &&
+        !isReadingFiles.value &&
+        !form.processing &&
+        !form.wasSuccessful,
+);
 
 const groups = computed(() => {
     const fileCounts = new Map<string, number>();

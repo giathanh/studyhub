@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\StudyStatus;
 use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +29,28 @@ class Course extends Model
             'status' => StudyStatus::class,
             'target_date' => 'date',
         ];
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function withLessonCounts(Builder $query): void
+    {
+        $query->withCount([
+            'lessons',
+            'lessons as completed_lessons_count' => fn (Builder $lessonQuery) => $lessonQuery
+                ->where('status', StudyStatus::Completed),
+        ]);
+    }
+
+    public function loadLessonCounts(): self
+    {
+        return $this->loadCount([
+            'lessons',
+            'lessons as completed_lessons_count' => fn (Builder $lessonQuery) => $lessonQuery
+                ->where('status', StudyStatus::Completed),
+        ]);
     }
 
     /**

@@ -2,10 +2,11 @@
 import { Link } from '@inertiajs/vue3';
 import LessonForm from '@/components/LessonForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { Course } from '@/types/course';
+import type { Course, StatusOption } from '@/types/course';
 
 defineProps<{
     course: { data: Course };
+    statuses: StatusOption[];
 }>();
 </script>
 
@@ -17,6 +18,7 @@ defineProps<{
         <LessonForm
             :action="`/courses/${course.data.id}/lessons`"
             method="post"
+            :statuses="statuses"
             submit-label="Create lesson"
         />
     </AppLayout>

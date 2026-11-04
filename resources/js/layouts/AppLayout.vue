@@ -23,6 +23,12 @@ const navigationLinks = [
             'M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-14c-4 0-6.5.5-8 2Zm0 0v14',
     },
     {
+        href: '/notes',
+        label: 'Notes',
+        iconPath:
+            'M7 4h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm7 0v5h5M9 13h6M9 17h4',
+    },
+    {
         href: '/settings/password',
         label: 'Change password',
         iconPath:

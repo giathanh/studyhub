@@ -18,7 +18,7 @@ class CourseController extends Controller
     public function index(Request $request): Response
     {
         $courses = $request->user()->courses()
-            ->withCount('lessons')
+            ->withLessonCounts()
             ->latest('id')
             ->paginate(12);
 
@@ -48,13 +48,15 @@ class CourseController extends Controller
         Gate::authorize('view', $course);
 
         $lessons = $course->lessons()
-            ->select(['id', 'course_id', 'section', 'title', 'status', 'position'])
+            ->select(['id', 'course_id', 'section', 'title', 'status', 'position', 'completed_at'])
             ->orderBy('position')
+            ->orderBy('id')
             ->paginate(50);
 
         return Inertia::render('Courses/Show', [
-            'course' => new CourseResource($course->loadCount('lessons')),
+            'course' => new CourseResource($course->loadLessonCounts()),
             'lessons' => LessonResource::collection($lessons),
+            'statuses' => StudyStatus::options(),
         ]);
     }
 

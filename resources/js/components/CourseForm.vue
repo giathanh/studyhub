@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import type { FormComponentRef } from '@inertiajs/core';
 import { Form } from '@inertiajs/vue3';
+import { useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import FormTextarea from '@/components/FormTextarea.vue';
 import MagicCard from '@/components/MagicCard.vue';
 import ShimmerButton from '@/components/ShimmerButton.vue';
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import type { Course, StatusOption } from '@/types/course';
 
 withDefaults(
@@ -19,11 +22,18 @@ withDefaults(
         course: undefined,
     },
 );
+
+const formRef = useTemplateRef<FormComponentRef>('formRef');
+
+useUnsavedChanges(() =>
+    Boolean(formRef.value?.isDirty && !formRef.value?.processing && !formRef.value?.wasSuccessful),
+);
 </script>
 
 <template>
     <MagicCard class="max-w-2xl p-6">
         <Form
+            ref="formRef"
             :action="action"
             :method="method"
             class="space-y-4"

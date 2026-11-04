@@ -26,6 +26,13 @@ class CourseResource extends JsonResource
             'status_label' => $this->status->label(),
             'target_date' => $this->target_date?->toDateString(),
             'lessons_count' => $this->whenCounted('lessons'),
+            'completed_lessons_count' => $this->whenCounted('completed_lessons_count'),
+            'progress' => $this->when(
+                $this->lessons_count !== null && $this->completed_lessons_count !== null,
+                fn (): int => $this->lessons_count > 0
+                    ? (int) round(($this->completed_lessons_count / $this->lessons_count) * 100)
+                    : 0,
+            ),
         ];
     }
 }

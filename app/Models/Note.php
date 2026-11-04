@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['title', 'body'])]
+#[Fillable(['course_id', 'lesson_id', 'title', 'body'])]
 class Note extends Model
 {
     /** @use HasFactory<NoteFactory> */
     use HasFactory;
+
+    /**
+     * The longest markdown body a note accepts.
+     */
+    public const int MAX_BODY_LENGTH = 200_000;
 
     /**
      * @return BelongsTo<User, $this>

@@ -44,11 +44,31 @@ const secondaryLinkClass =
                         <p v-if="course.description" class="mt-1 line-clamp-2 text-sm text-gray-600">
                             {{ course.description }}
                         </p>
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span>
+                                    {{ course.completed_lessons_count ?? 0 }}/{{ course.lessons_count ?? 0 }}
+                                    {{ course.lessons_count === 1 ? 'lesson' : 'lessons' }}
+                                </span>
+                                <span class="font-medium text-gray-700">{{ course.progress ?? 0 }}%</span>
+                            </div>
+                            <div
+                                class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100"
+                                role="progressbar"
+                                :aria-valuenow="course.progress ?? 0"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :aria-label="`${course.title} progress`"
+                            >
+                                <div
+                                    class="h-full rounded-full bg-brand transition-[width] duration-300"
+                                    :style="{ width: `${course.progress ?? 0}%` }"
+                                />
+                            </div>
+                        </div>
                         <p class="mt-3 text-sm text-gray-500">
-                            {{ course.lessons_count }} {{ course.lessons_count === 1 ? 'lesson' : 'lessons' }} · {{ course.status_label }}
-                        </p>
-                        <p v-if="course.target_date" class="text-sm text-gray-500">
-                            Target: {{ course.target_date }}
+                            {{ course.status_label }}
+                            <template v-if="course.target_date">· Target: {{ course.target_date }}</template>
                         </p>
                     </MagicCard>
                 </Link>

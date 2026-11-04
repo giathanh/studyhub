@@ -198,4 +198,34 @@ class CourseTest extends TestCase
 
         $this->assertSame('Private', $course->refresh()->title);
     }
+
+    public function test_course_progress_is_zero_when_it_has_no_lessons(): void
+    {
+        $course = Course::factory()->create();
+
+        $this->actingAs($course->user)
+            ->get(route('courses.show', $course))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Courses/Show')
+                ->where('course.data.lessons_count', 0)
+                ->where('course.data.completed_lessons_count', 0)
+                ->where('course.data.progress', 0));
+    }
+
+    public function test_course_progress_is_calculated_from_completed_lessons(): void
+    {
+        $course = Course::factory()->create();
+        Lesson::factory()->for($course)->create(['position' => 1, 'status' => StudyStatus::Completed]);
+        Lesson::factory()->for($course)->create(['position' => 2, 'status' => StudyStatus::InProgress]);
+        Lesson::factory()->for($course)->count(2)->create(['position' => 3, 'status' => StudyStatus::NotStarted]);
+
+        $this->actingAs($course->user)
+            ->get(route('courses.index'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('courses.data.0.lessons_count', 4)
+                ->where('courses.data.0.completed_lessons_count', 1)
+                ->where('courses.data.0.progress', 25));
+    }
 }

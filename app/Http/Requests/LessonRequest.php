@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\StudyStatus;
 use App\Models\Lesson;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LessonRequest extends FormRequest
 {
@@ -27,6 +29,7 @@ class LessonRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'section' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'string', 'max:'.Lesson::MAX_CONTENT_LENGTH],
+            'status' => ['sometimes', 'required', Rule::enum(StudyStatus::class)],
         ];
     }
 }

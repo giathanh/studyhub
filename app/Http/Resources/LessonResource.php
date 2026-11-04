@@ -20,10 +20,13 @@ class LessonResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'course_id' => $this->course_id,
             'section' => $this->section,
             'title' => $this->title,
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
+            'position' => $this->position,
+            'completed_at' => $this->completed_at?->toDateString(),
             'content' => $this->whenHas('content'),
         ];
     }
