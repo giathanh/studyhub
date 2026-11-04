@@ -4,6 +4,7 @@ import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import AnimatedGridPattern from '@/components/AnimatedGridPattern.vue';
 import AuroraText from '@/components/AuroraText.vue';
 import BlurFade from '@/components/BlurFade.vue';
+import ScrollToTopButton from '@/components/ScrollToTopButton.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
 
 defineProps<{
@@ -229,5 +230,7 @@ async function hideSidebar(): Promise<void> {
                 <slot />
             </BlurFade>
         </main>
+
+        <ScrollToTopButton />
     </div>
 </template>
