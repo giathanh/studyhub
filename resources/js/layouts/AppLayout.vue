@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import AnimatedGridPattern from '@/components/AnimatedGridPattern.vue';
 import AuroraText from '@/components/AuroraText.vue';
 import BlurFade from '@/components/BlurFade.vue';
@@ -27,12 +27,36 @@ const navigationLinks = [
 const page = usePage();
 const userName = computed(() => page.props.auth.user?.name ?? '');
 const currentPath = computed(() => page.url.split('?')[0]);
+const sidebarHiddenStorageKey = 'studyhub.sidebar-hidden';
 const isSidebarOpen = ref(false);
+const isSidebarHidden = ref(localStorage.getItem(sidebarHiddenStorageKey) === 'true');
+const showMenuButton = useTemplateRef<HTMLButtonElement>('showMenuButton');
+const hideMenuButton = useTemplateRef<HTMLButtonElement>('hideMenuButton');
+
+function setSidebarHidden(isHidden: boolean): void {
+    isSidebarHidden.value = isHidden;
+    localStorage.setItem(sidebarHiddenStorageKey, String(isHidden));
+}
+
+async function showSidebar(): Promise<void> {
+    isSidebarOpen.value = true;
+    setSidebarHidden(false);
+    await nextTick();
+    hideMenuButton.value?.focus();
+}
+
+async function hideSidebar(): Promise<void> {
+    isSidebarOpen.value = false;
+    setSidebarHidden(true);
+    await nextTick();
+    showMenuButton.value?.focus();
+}
 </script>
 
 <template>
     <div
-        class="relative isolate min-h-screen overflow-x-clip bg-gray-50 lg:pl-64"
+        class="relative isolate min-h-screen overflow-x-clip bg-gray-50 transition-[padding] duration-200 motion-reduce:transition-none"
+        :class="{ 'lg:pl-64': !isSidebarHidden }"
         @keydown.esc="isSidebarOpen = false"
     >
         <Head :title="title" />
@@ -47,15 +71,17 @@ const isSidebarOpen = ref(false);
         </div>
 
         <header
-            class="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-200/70 bg-white/70 px-4 py-3 backdrop-blur-md lg:hidden"
+            class="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-200/70 bg-white/70 px-4 py-3 backdrop-blur-md"
+            :class="{ 'lg:hidden': !isSidebarHidden }"
         >
             <button
+                ref="showMenuButton"
                 type="button"
-                aria-label="Open menu"
+                aria-label="Show menu"
                 aria-controls="app-sidebar"
                 :aria-expanded="isSidebarOpen"
                 class="cursor-pointer rounded-lg p-1.5 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                @click="isSidebarOpen = true"
+                @click="showSidebar"
             >
                 <svg
                     aria-hidden="true"
@@ -85,19 +111,41 @@ const isSidebarOpen = ref(false);
         <aside
             id="app-sidebar"
             class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/70 bg-white/90 backdrop-blur-md transition-transform duration-200 motion-reduce:transition-none"
-            :class="
-                isSidebarOpen
-                    ? 'translate-x-0'
-                    : 'invisible -translate-x-full lg:visible lg:translate-x-0'
-            "
+            :class="[
+                isSidebarOpen ? 'translate-x-0' : 'invisible -translate-x-full',
+                isSidebarHidden
+                    ? 'lg:invisible lg:-translate-x-full'
+                    : 'lg:visible lg:translate-x-0',
+            ]"
         >
-            <div class="px-6 py-5">
+            <div class="flex items-center justify-between py-5 pr-3 pl-6">
                 <Link
                     href="/dashboard"
                     class="rounded-md text-xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
                     <AuroraText>StudyHub</AuroraText>
                 </Link>
+                <button
+                    ref="hideMenuButton"
+                    type="button"
+                    aria-label="Hide menu"
+                    aria-controls="app-sidebar"
+                    class="cursor-pointer rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    @click="hideSidebar"
+                >
+                    <svg
+                        aria-hidden="true"
+                        class="size-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M9 4v16M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm10 5-3 3 3 3" />
+                    </svg>
+                </button>
             </div>
 
             <nav aria-label="Main" class="flex flex-1 flex-col gap-1 overflow-y-auto px-3 text-sm">
