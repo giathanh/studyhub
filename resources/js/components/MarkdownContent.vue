@@ -46,8 +46,20 @@ const headingClasses: Record<number, string> = {
                 v-else-if="block.type === 'ul'"
                 class="list-disc space-y-1.5 pl-5 text-gray-800"
             >
-                <li v-for="item in block.items" :key="item.id">
-                    <MarkdownInline :tokens="item.tokens" />
+                <li
+                    v-for="item in block.items"
+                    :key="item.id"
+                    :class="item.checked !== undefined ? 'flex list-none items-start gap-2' : undefined"
+                >
+                    <input
+                        v-if="item.checked !== undefined"
+                        type="checkbox"
+                        :checked="item.checked"
+                        disabled
+                        :aria-label="item.tokens.map((token) => token.text).join('') || 'Checklist item'"
+                        class="mt-1 size-4 shrink-0 accent-brand"
+                    />
+                    <span><MarkdownInline :tokens="item.tokens" /></span>
                 </li>
             </ul>
 
@@ -55,10 +67,45 @@ const headingClasses: Record<number, string> = {
                 v-else-if="block.type === 'ol'"
                 class="list-decimal space-y-1.5 pl-5 text-gray-800"
             >
-                <li v-for="item in block.items" :key="item.id">
-                    <MarkdownInline :tokens="item.tokens" />
+                <li
+                    v-for="item in block.items"
+                    :key="item.id"
+                    :class="item.checked !== undefined ? 'flex list-none items-start gap-2' : undefined"
+                >
+                    <input
+                        v-if="item.checked !== undefined"
+                        type="checkbox"
+                        :checked="item.checked"
+                        disabled
+                        :aria-label="item.tokens.map((token) => token.text).join('') || 'Checklist item'"
+                        class="mt-1 size-4 shrink-0 accent-brand"
+                    />
+                    <span><MarkdownInline :tokens="item.tokens" /></span>
                 </li>
             </ol>
+
+            <div v-else-if="block.type === 'table'" class="max-w-full overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full border-collapse text-left text-sm">
+                    <thead class="bg-gray-50 text-gray-900">
+                        <tr>
+                            <th v-for="column in block.columns" :key="column.id" scope="col"
+                                :style="{ textAlign: column.align }"
+                                class="border-b border-gray-200 px-4 py-3 font-semibold">
+                                <MarkdownInline :tokens="column.tokens" />
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr v-for="row in block.rows" :key="row.id">
+                            <td v-for="(cell, index) in row.cells" :key="cell.id"
+                                :style="{ textAlign: block.columns?.[index]?.align }"
+                                class="min-w-32 px-4 py-3 align-top">
+                                <MarkdownInline :tokens="cell.tokens" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <hr v-else-if="block.type === 'hr'" class="border-gray-200" />
 
