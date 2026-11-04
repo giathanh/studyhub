@@ -1,0 +1,54 @@
+name: studyhub
+
+x-app: &app
+  image: studyhub-app
+  build:
+    context: .
+    target: app
+  environment:
+    APP_NAME: StudyHub
+    APP_ENV: production
+    APP_DEBUG: "false"
+    APP_KEY: ${APP_KEY:?Set APP_KEY in .env}
+    APP_URL: http://localhost:${DOCKER_APP_PORT:-8080}
+    LOG_CHANNEL: stderr
+    DB_CONNECTION: mysql
+    DB_HOST: ${DOCKER_DB_HOST:?Set DOCKER_DB_HOST to the RDS endpoint}
+    DB_PORT: ${DOCKER_DB_PORT:-3306}
+    DB_DATABASE: ${DOCKER_DB_DATABASE:-studyhub}
+    DB_USERNAME: ${DOCKER_DB_USERNAME:?Set DOCKER_DB_USERNAME}
+    DB_PASSWORD: ${DOCKER_DB_PASSWORD?Set DOCKER_DB_PASSWORD}
+    MYSQL_ATTR_SSL_CA: ${DOCKER_DB_SSL_CA-/etc/ssl/certs/rds-global-bundle.pem}
+    SESSION_DRIVER: database
+    CACHE_STORE: database
+    QUEUE_CONNECTION: database
+    MAIL_MAILER: log
+
+services:
+  web:
+    image: studyhub-web
+    build:
+      context: .
+      target: web
+    ports:
+      - "${DOCKER_APP_PORT:-8080}:80"
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    <<: *app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["php", "artisan", "migrate", "--force"]
+    restart: "no"
