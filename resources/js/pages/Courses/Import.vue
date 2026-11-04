@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import GithubCourseImport from '@/components/GithubCourseImport.vue';
 import FormField from '@/components/FormField.vue';
 import MagicCard from '@/components/MagicCard.vue';
 import ShimmerButton from '@/components/ShimmerButton.vue';
@@ -147,6 +148,7 @@ const pickerClass =
 
 <template>
     <AppLayout title="Import Markdown">
+        <GithubCourseImport />
         <MagicCard class="max-w-2xl p-6">
             <form class="space-y-5" @submit.prevent="submit">
                 <div>

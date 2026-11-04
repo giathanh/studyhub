@@ -3,6 +3,7 @@
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseImportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GithubCourseImportController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\StudySessionController;
@@ -16,6 +17,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/courses/import', [CourseImportController::class, 'create'])->name('courses.import.create');
     Route::post('/courses/import', [CourseImportController::class, 'store'])->name('courses.import.store');
+
+    Route::post('/courses/import/github/preview', [GithubCourseImportController::class, 'preview'])->middleware('throttle:10,1')->name('courses.import.github.preview');
+    Route::post('/courses/import/github', [GithubCourseImportController::class, 'store'])->middleware('throttle:5,1')->name('courses.import.github.store');
 
     Route::resource('courses', CourseController::class);
     Route::resource('notes', NoteController::class);
