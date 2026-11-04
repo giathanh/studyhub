@@ -33,6 +33,35 @@ lerd worker start vite   # bật Vite và HMR
 
 Lerd tự ghi biến kết nối vào `.env`, không cần sửa tay. `DB_HOST=lerd-mysql` chỉ phân giải được trong container, nên hãy chạy lệnh qua `php artisan` thay vì dùng MySQL client trên máy host.
 
+## Chạy bằng Docker
+
+Stack Docker gồm Nginx và PHP-FPM, chạy bản build production, không có HMR. Database dùng Amazon RDS for MySQL nên không nằm trong Compose. Việc phát triển hằng ngày vẫn dùng Lerd.
+
+Khai báo các biến sau trong `.env`:
+
+| Biến | Bắt buộc | Mặc định | Ý nghĩa |
+| --- | --- | --- | --- |
+| `APP_KEY` | Có | | Khóa mã hóa của ứng dụng |
+| `DOCKER_DB_HOST` | Có | | Endpoint của RDS |
+| `DOCKER_DB_USERNAME` | Có | | User database |
+| `DOCKER_DB_PASSWORD` | Có | | Mật khẩu database |
+| `DOCKER_DB_DATABASE` | Không | `studyhub` | Tên database, cần được tạo sẵn trên RDS |
+| `DOCKER_DB_PORT` | Không | `3306` | Cổng database |
+| `DOCKER_DB_SSL_CA` | Không | CA của AWS trong image | Để trống khi dùng MySQL local không có TLS |
+| `DOCKER_APP_PORT` | Không | `8080` | Cổng trên máy host |
+
+```bash
+docker compose up -d --build   # build image, chạy migration rồi khởi động
+docker compose logs -f app     # xem log
+docker compose down            # dừng stack, không ảnh hưởng dữ liệu trên RDS
+```
+
+Ứng dụng chạy tại `http://localhost:8080`. Compose không copy `.env` vào image. Kết nối tới RDS dùng TLS với chứng chỉ CA của AWS có sẵn trong image.
+
+Để dùng MySQL của Lerd trên máy local, đặt `DOCKER_DB_HOST=host.docker.internal`, `DOCKER_DB_SSL_CA=` (để trống), rồi dùng user và mật khẩu giống `DB_USERNAME`, `DB_PASSWORD` trong `.env`. Không dùng `localhost` vì trong container nó trỏ về chính container. Khi đó stack dùng chung database với Lerd.
+
+Máy chạy Docker phải kết nối được tới RDS: Security Group của RDS cần cho phép cổng 3306 từ máy đó. RDS không nên mở ra Internet, nên thường chỉ chạy được stack này từ bên trong VPC.
+
 ## Kiểm tra
 
 ```bash
