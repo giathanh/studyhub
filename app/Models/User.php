@@ -46,4 +46,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Note::class);
     }
+
+    /** @return HasMany<StudySession, $this> */
+    public function studySessions(): HasMany
+    {
+        return $this->hasMany(StudySession::class);
+    }
 }

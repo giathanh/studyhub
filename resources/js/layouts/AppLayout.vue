@@ -29,6 +29,11 @@ const navigationLinks = [
             'M7 4h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm7 0v5h5M9 13h6M9 17h4',
     },
     {
+        href: '/study-sessions',
+        label: 'Study sessions',
+        iconPath: 'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+    },
+    {
         href: '/settings/password',
         label: 'Change password',
         iconPath:

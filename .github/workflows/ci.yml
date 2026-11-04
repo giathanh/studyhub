@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+      - name: Check PHP formatting
+        run: vendor/bin/pint --test --format agent
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Check TypeScript
+        run: npm run types:check
+      - name: Build frontend
+        run: npm run build
+      - name: Test Markdown rendering
+        run: node --test tests/Unit/Markdown.test.mjs
+      - name: Test application
+        run: php artisan test --compact

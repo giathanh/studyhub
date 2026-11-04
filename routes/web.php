@@ -2,14 +2,16 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseImportController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\StudySessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Home')->name('home');
 
 Route::middleware('auth')->group(function (): void {
-    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::inertia('/settings/password', 'Settings/Password')->name('settings.password');
 
     Route::get('/courses/import', [CourseImportController::class, 'create'])->name('courses.import.create');
@@ -17,6 +19,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::resource('courses', CourseController::class);
     Route::resource('notes', NoteController::class);
+    Route::resource('study-sessions', StudySessionController::class)->only(['index', 'store', 'destroy']);
 
     Route::scopeBindings()->group(function (): void {
         Route::resource('courses.lessons', LessonController::class)->except('index');

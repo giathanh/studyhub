@@ -158,10 +158,23 @@ Với tooling PHP local, khám phá `exec` / `vendor_bins` trước rồi chạy
 
 ### Tiêu chí hoàn thành
 
-- [ ] Dashboard hiển thị đúng dữ liệu của người đăng nhập.
+- [x] Dashboard hiển thị đúng dữ liệu của người đăng nhập (feature test và HTTP local).
 - [ ] Các luồng quan trọng có kiểm tra phù hợp và CI chạy thành công.
-- [ ] Không có N+1 mới trong các route đã kiểm chứng.
+- [x] Không có N+1 mới trong các route đã kiểm chứng (`/dashboard`, `/study-sessions`, tìm bài IAM; request lenses không có issues).
 - [ ] Có phiên bản MVP dùng được ở local.
+
+### Kết quả triển khai ngày 04/11/2026
+
+- Đã thêm dashboard có phân trang: khóa đang học, tiến độ, bài chưa hoàn thành, ghi chú gần đây và tổng phút học tuần hiện tại (thứ Hai–Chủ nhật).
+- Đã thêm `study_sessions`, nhập ngày và thời lượng thủ công (1–1.440 phút), bài liên quan tùy chọn, lịch sử phân trang và xóa có xác nhận. Bài bị xóa thì giữ nhật ký và bỏ liên kết.
+- Backend kiểm tra quyền sở hữu bài học, không cho client chọn chủ sở hữu nhật ký; migration đã chạy trên MySQL local.
+- Đã thêm `.github/workflows/ci.yml`: PHP 8.5, Node từ `.node-version`, PHPUnit, Pint, TypeScript, build và test Markdown; YAML hợp lệ. Chưa push hoặc chạy workflow trên GitHub.
+- Đã kiểm tra local: 95 PHPUnit tests / 629 assertions, 3 test Markdown, Pint, `npm run types:check`, `npm run build`, `git diff --check` đều qua.
+- HTTP local trả 200; request lenses sạch: dashboard `0065f6e20c3e2556207`, nhật ký `0065f6e20c4aa989a1`, tìm bài `0065f6e20c55d3f8a1`. `optimize_route` không báo route chậm.
+- Đã sửa lỗi SSR 404 được capture phát hiện bằng cách tắt SSR trong `config/inertia.php`, phù hợp ứng dụng hiện chỉ cấu hình client rendering.
+- Chưa kiểm chứng giao diện desktop/mobile: công cụ trình duyệt báo `The browser access host is unavailable`. Chưa chạy visual smoke/state coverage scripts vì không có phiên trình duyệt kiểm tra; đã rà trạng thái rỗng, validation và submitting trong mã nguồn.
+- Build có cảnh báo không chặn: thiếu optional `fontaine`; Lerd không đồng bộ được global wrapper `uiux-skills` trong sandbox (`operation not permitted`). Không thêm dependency.
+- Còn chờ chạy CI trên GitHub, kiểm tra UI trực tiếp và dùng thử vài ngày. Chưa tạo tag `v0.1.0` trước các bước nghiệm thu này.
 
 ## 6. Tuần 5 — Chuẩn bị AWS và deploy lần đầu
 
