@@ -19,6 +19,9 @@ const lessonUrl = `/courses/${props.course.data.id}/lessons/${props.lesson.data.
 const secondaryButtonClass =
     'cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
 
+const dangerButtonClass =
+    'cursor-pointer rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-red-700 hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600';
+
 function changeStatus(status: string): void {
     router.patch(`${lessonUrl}/status`, { status }, { preserveScroll: true });
 }
@@ -65,7 +68,7 @@ function deleteLesson(): void {
                     <Link :href="`${lessonUrl}/edit`" :class="[secondaryButtonClass, 'text-gray-700']">
                         Edit
                     </Link>
-                    <button type="button" :class="[secondaryButtonClass, 'text-red-700']" @click="deleteLesson">
+                    <button type="button" :class="dangerButtonClass" @click="deleteLesson">
                         Delete
                     </button>
                 </div>

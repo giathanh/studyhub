@@ -46,6 +46,9 @@ const lessonCountLabel = computed(
 const secondaryButtonClass =
     'cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
 
+const dangerButtonClass =
+    'cursor-pointer rounded-lg border border-red-600 bg-red-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-red-700 hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600';
+
 const moveButtonClass =
     'cursor-pointer rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-40';
 
@@ -111,7 +114,7 @@ function deleteCourse(): void {
                     <Link :href="`/courses/${course.id}/edit`" :class="[secondaryButtonClass, 'text-gray-700']">
                         Edit
                     </Link>
-                    <button type="button" :class="[secondaryButtonClass, 'text-red-700']" @click="deleteCourse">
+                    <button type="button" :class="dangerButtonClass" @click="deleteCourse">
                         Delete
                     </button>
                     <ShimmerButton :as="Link" :href="`/courses/${course.id}/lessons/create`">

@@ -15,6 +15,9 @@ const note = computed(() => props.note.data);
 const secondaryButtonClass =
     'cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
 
+const dangerButtonClass =
+    'cursor-pointer rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-red-700 hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600';
+
 function deleteNote(): void {
     if (window.confirm(`Delete "${note.value.title}"? This cannot be undone.`)) {
         router.delete(`/notes/${note.value.id}`);
@@ -58,7 +61,7 @@ function deleteNote(): void {
                     <Link :href="`/notes/${note.id}/edit`" :class="[secondaryButtonClass, 'text-gray-700']">
                         Edit
                     </Link>
-                    <button type="button" :class="[secondaryButtonClass, 'text-red-700']" @click="deleteNote">
+                    <button type="button" :class="dangerButtonClass" @click="deleteNote">
                         Delete
                     </button>
                 </div>
