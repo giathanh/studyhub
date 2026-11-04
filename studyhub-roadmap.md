@@ -76,10 +76,25 @@ Nếu Lerd yêu cầu tải image, thông báo image và kích thước cho ngư
 | --- | --- |
 | `users` | Thông tin tài khoản |
 | `courses` | `user_id`, `title`, `description`, `status`, `target_date` |
-| `lessons` | `course_id`, `title`, `status`, `position`, `completed_at` |
+| `lessons` | `course_id`, `section` nullable, `title`, `content` nullable (Markdown), `status`, `position`, `completed_at` |
 | `notes` | `user_id`, `course_id` nullable, `lesson_id` nullable, `title`, `body` |
 
 Ghi chú có thể độc lập, thuộc khóa học hoặc gắn với bài học. Nếu có cả `course_id` và `lesson_id`, backend phải kiểm tra bài học thuộc đúng khóa. Mọi quan hệ được gửi từ client đều phải được kiểm tra quyền sở hữu.
+
+### Tạo nội dung: thủ công và import Markdown
+
+Cả hai cách ghi vào cùng bảng `courses` và `lessons`; sau khi import, bài học sửa được như bài tạo tay.
+
+| Đầu vào | Kết quả |
+| --- | --- |
+| Nhiều file hoặc một thư mục | Mỗi file là một bài; H1 là tiêu đề bài; thư mục cấp 1 là `section`; thứ tự theo đường dẫn |
+| Một file | H1 là tên khóa; phần trước H2 đầu tiên là mô tả; mỗi H2 là một bài |
+
+- Trình duyệt đọc file và gửi text dạng JSON, vì `max_file_uploads` của PHP mặc định là 20 và sẽ cắt bớt thư mục lớn.
+- Heading trong code fence không được tính là heading.
+- Import luôn tạo khóa mới, chưa đồng bộ lại khi file gốc thay đổi.
+
+Tuần 2 làm trước phần tạo, sửa, xóa bài học vì nội dung khóa cần chỗ nhập tay. Sắp xếp, đổi trạng thái và hiển thị Markdown vẫn thuộc Tuần 3.
 
 ### Các bước
 
@@ -88,14 +103,15 @@ Ghi chú có thể độc lập, thuộc khóa học hoặc gắn với bài h�
 3. Xây CRUD khóa học bằng routes, controller và Vue pages.
 4. Validation bằng Form Request; phân quyền bằng Policy.
 5. Hiển thị lỗi form, thông báo thành công, trạng thái rỗng và phân trang.
-6. Quy định hành vi xóa khóa học có bài và ghi chú trước khi thêm cascade hoặc soft delete.
+6. Hành vi xóa khóa học: xóa hẳn, bài học bị xóa theo, ghi chú được giữ lại và bỏ liên kết (`nullOnDelete`). Không dùng soft delete.
 7. Kiểm tra với hai tài khoản, bao gồm truy cập trực tiếp ID của nhau.
 
 ### Tiêu chí hoàn thành
 
-- [ ] Người dùng tạo, sửa, xóa và liệt kê khóa học của mình.
-- [ ] Không đọc hoặc sửa được khóa học của người khác.
-- [ ] Dữ liệu sai bị từ chối ở backend.
+- [x] Người dùng tạo, sửa, xóa và liệt kê khóa học của mình.
+- [x] Không đọc hoặc sửa được khóa học của người khác.
+- [x] Dữ liệu sai bị từ chối ở backend.
+- [x] Tạo được nội dung khóa học thủ công và bằng import Markdown.
 
 ## 4. Tuần 3 — Bài học, ghi chú và tìm kiếm
 
