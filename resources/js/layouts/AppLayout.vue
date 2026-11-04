@@ -4,6 +4,7 @@ import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import AnimatedGridPattern from '@/components/AnimatedGridPattern.vue';
 import AuroraText from '@/components/AuroraText.vue';
 import BlurFade from '@/components/BlurFade.vue';
+import ScrollToTopButton from '@/components/ScrollToTopButton.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
 
 defineProps<{
@@ -17,6 +18,23 @@ const navigationLinks = [
         iconPath: 'M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5M10 20v-6h4v6',
     },
     {
+        href: '/courses',
+        label: 'Courses',
+        iconPath:
+            'M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-14c-4 0-6.5.5-8 2Zm0 0v14',
+    },
+    {
+        href: '/notes',
+        label: 'Notes',
+        iconPath:
+            'M7 4h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm7 0v5h5M9 13h6M9 17h4',
+    },
+    {
+        href: '/study-sessions',
+        label: 'Study sessions',
+        iconPath: 'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+    },
+    {
         href: '/settings/password',
         label: 'Change password',
         iconPath:
@@ -27,11 +45,16 @@ const navigationLinks = [
 const page = usePage();
 const userName = computed(() => page.props.auth.user?.name ?? '');
 const currentPath = computed(() => page.url.split('?')[0]);
+const successMessage = computed(() => page.flash.success);
 const sidebarHiddenStorageKey = 'studyhub.sidebar-hidden';
 const isSidebarOpen = ref(false);
 const isSidebarHidden = ref(localStorage.getItem(sidebarHiddenStorageKey) === 'true');
 const showMenuButton = useTemplateRef<HTMLButtonElement>('showMenuButton');
 const hideMenuButton = useTemplateRef<HTMLButtonElement>('hideMenuButton');
+
+function isCurrentLink(href: string): boolean {
+    return currentPath.value === href || currentPath.value.startsWith(`${href}/`);
+}
 
 function setSidebarHidden(isHidden: boolean): void {
     isSidebarHidden.value = isHidden;
@@ -153,7 +176,7 @@ async function hideSidebar(): Promise<void> {
                     v-for="link in navigationLinks"
                     :key="link.href"
                     :href="link.href"
-                    :aria-current="currentPath === link.href ? 'page' : undefined"
+                    :aria-current="isCurrentLink(link.href) ? 'page' : undefined"
                     class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand aria-[current=page]:bg-brand/10 aria-[current=page]:text-brand"
                 >
                     <svg
@@ -190,6 +213,14 @@ async function hideSidebar(): Promise<void> {
 
         <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
             <BlurFade>
+                <p
+                    v-if="successMessage"
+                    role="status"
+                    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
+                >
+                    {{ successMessage }}
+                </p>
+
                 <slot name="heading">
                     <h1 class="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
                         {{ title }}
@@ -199,5 +230,7 @@ async function hideSidebar(): Promise<void> {
                 <slot />
             </BlurFade>
         </main>
+
+        <ScrollToTopButton />
     </div>
 </template>

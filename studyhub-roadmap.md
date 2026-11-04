@@ -76,10 +76,25 @@ Nếu Lerd yêu cầu tải image, thông báo image và kích thước cho ngư
 | --- | --- |
 | `users` | Thông tin tài khoản |
 | `courses` | `user_id`, `title`, `description`, `status`, `target_date` |
-| `lessons` | `course_id`, `title`, `status`, `position`, `completed_at` |
+| `lessons` | `course_id`, `section` nullable, `title`, `content` nullable (Markdown), `status`, `position`, `completed_at` |
 | `notes` | `user_id`, `course_id` nullable, `lesson_id` nullable, `title`, `body` |
 
 Ghi chú có thể độc lập, thuộc khóa học hoặc gắn với bài học. Nếu có cả `course_id` và `lesson_id`, backend phải kiểm tra bài học thuộc đúng khóa. Mọi quan hệ được gửi từ client đều phải được kiểm tra quyền sở hữu.
+
+### Tạo nội dung: thủ công và import Markdown
+
+Cả hai cách ghi vào cùng bảng `courses` và `lessons`; sau khi import, bài học sửa được như bài tạo tay.
+
+| Đầu vào | Kết quả |
+| --- | --- |
+| Nhiều file hoặc một thư mục | Mỗi file là một bài; H1 là tiêu đề bài; thư mục cấp 1 là `section`; thứ tự theo đường dẫn |
+| Một file | H1 là tên khóa; phần trước H2 đầu tiên là mô tả; mỗi H2 là một bài |
+
+- Trình duyệt đọc file và gửi text dạng JSON, vì `max_file_uploads` của PHP mặc định là 20 và sẽ cắt bớt thư mục lớn.
+- Heading trong code fence không được tính là heading.
+- Import luôn tạo khóa mới, chưa đồng bộ lại khi file gốc thay đổi.
+
+Tuần 2 làm trước phần tạo, sửa, xóa bài học vì nội dung khóa cần chỗ nhập tay. Sắp xếp, đổi trạng thái và hiển thị Markdown vẫn thuộc Tuần 3.
 
 ### Các bước
 
@@ -88,14 +103,15 @@ Ghi chú có thể độc lập, thuộc khóa học hoặc gắn với bài h�
 3. Xây CRUD khóa học bằng routes, controller và Vue pages.
 4. Validation bằng Form Request; phân quyền bằng Policy.
 5. Hiển thị lỗi form, thông báo thành công, trạng thái rỗng và phân trang.
-6. Quy định hành vi xóa khóa học có bài và ghi chú trước khi thêm cascade hoặc soft delete.
+6. Hành vi xóa khóa học: xóa hẳn, bài học bị xóa theo, ghi chú được giữ lại và bỏ liên kết (`nullOnDelete`). Không dùng soft delete.
 7. Kiểm tra với hai tài khoản, bao gồm truy cập trực tiếp ID của nhau.
 
 ### Tiêu chí hoàn thành
 
-- [ ] Người dùng tạo, sửa, xóa và liệt kê khóa học của mình.
-- [ ] Không đọc hoặc sửa được khóa học của người khác.
-- [ ] Dữ liệu sai bị từ chối ở backend.
+- [x] Người dùng tạo, sửa, xóa và liệt kê khóa học của mình.
+- [x] Không đọc hoặc sửa được khóa học của người khác.
+- [x] Dữ liệu sai bị từ chối ở backend.
+- [x] Tạo được nội dung khóa học thủ công và bằng import Markdown.
 
 ## 4. Tuần 3 — Bài học, ghi chú và tìm kiếm
 
@@ -121,10 +137,10 @@ Ghi chú có thể độc lập, thuộc khóa học hoặc gắn với bài h�
 
 ### Tiêu chí hoàn thành
 
-- [ ] Học một bài AWS thật và lưu ghi chú bằng ứng dụng.
-- [ ] Tìm lại ghi chú và đổi trạng thái bài học được.
-- [ ] Backend từ chối liên kết ghi chú với bài hoặc khóa của người khác.
-- [ ] Nội dung Markdown không thực thi script.
+- [x] Học một bài AWS thật và lưu ghi chú bằng ứng dụng.
+- [x] Tìm lại ghi chú và đổi trạng thái bài học được.
+- [x] Backend từ chối liên kết ghi chú với bài hoặc khóa của người khác.
+- [x] Nội dung Markdown không thực thi script.
 
 ## 5. Tuần 4 — Dashboard và bản dùng hằng ngày
 
@@ -142,10 +158,23 @@ Với tooling PHP local, khám phá `exec` / `vendor_bins` trước rồi chạy
 
 ### Tiêu chí hoàn thành
 
-- [ ] Dashboard hiển thị đúng dữ liệu của người đăng nhập.
+- [x] Dashboard hiển thị đúng dữ liệu của người đăng nhập (feature test và HTTP local).
 - [ ] Các luồng quan trọng có kiểm tra phù hợp và CI chạy thành công.
-- [ ] Không có N+1 mới trong các route đã kiểm chứng.
+- [x] Không có N+1 mới trong các route đã kiểm chứng (`/dashboard`, `/study-sessions`, tìm bài IAM; request lenses không có issues).
 - [ ] Có phiên bản MVP dùng được ở local.
+
+### Kết quả triển khai ngày 04/11/2026
+
+- Đã thêm dashboard có phân trang: khóa đang học, tiến độ, bài chưa hoàn thành, ghi chú gần đây và tổng phút học tuần hiện tại (thứ Hai–Chủ nhật).
+- Đã thêm `study_sessions`, nhập ngày và thời lượng thủ công (1–1.440 phút), bài liên quan tùy chọn, lịch sử phân trang và xóa có xác nhận. Bài bị xóa thì giữ nhật ký và bỏ liên kết.
+- Backend kiểm tra quyền sở hữu bài học, không cho client chọn chủ sở hữu nhật ký; migration đã chạy trên MySQL local.
+- Đã thêm `.github/workflows/ci.yml`: PHP 8.5, Node từ `.node-version`, PHPUnit, Pint, TypeScript, build và test Markdown; YAML hợp lệ. Chưa push hoặc chạy workflow trên GitHub.
+- Đã kiểm tra local: 95 PHPUnit tests / 629 assertions, 3 test Markdown, Pint, `npm run types:check`, `npm run build`, `git diff --check` đều qua.
+- HTTP local trả 200; request lenses sạch: dashboard `0065f6e20c3e2556207`, nhật ký `0065f6e20c4aa989a1`, tìm bài `0065f6e20c55d3f8a1`. `optimize_route` không báo route chậm.
+- Đã sửa lỗi SSR 404 được capture phát hiện bằng cách tắt SSR trong `config/inertia.php`, phù hợp ứng dụng hiện chỉ cấu hình client rendering.
+- Chưa kiểm chứng giao diện desktop/mobile: công cụ trình duyệt báo `The browser access host is unavailable`. Chưa chạy visual smoke/state coverage scripts vì không có phiên trình duyệt kiểm tra; đã rà trạng thái rỗng, validation và submitting trong mã nguồn.
+- Build có cảnh báo không chặn: thiếu optional `fontaine`; Lerd không đồng bộ được global wrapper `uiux-skills` trong sandbox (`operation not permitted`). Không thêm dependency.
+- Còn chờ chạy CI trên GitHub, kiểm tra UI trực tiếp và dùng thử vài ngày. Chưa tạo tag `v0.1.0` trước các bước nghiệm thu này.
 
 ## 6. Tuần 5 — Chuẩn bị AWS và deploy lần đầu
 

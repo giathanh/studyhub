@@ -1,115 +1,71 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import AuroraText from '@/components/AuroraText.vue';
-import BlurFade from '@/components/BlurFade.vue';
-import BorderBeam from '@/components/BorderBeam.vue';
-import MagicCard from '@/components/MagicCard.vue';
-import UserAvatar from '@/components/UserAvatar.vue';
+import { Link } from '@inertiajs/vue3';
+import PaginationLinks from '@/components/PaginationLinks.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import type { Course, Paginated } from '@/types/course';
 
-const page = usePage();
-const userName = computed(() => page.props.auth.user?.name ?? '');
+defineProps<{
+    courses: Paginated<Course>;
+    lessons: Paginated<{ id: number; course_id: number; title: string; course_title: string }>;
+    notes: Paginated<{ id: number; title: string }>;
+    week: { start: string; end: string; minutes: number };
+}>();
+
+const linkClass = 'font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
 </script>
 
 <template>
     <AppLayout title="Dashboard">
-        <template #heading>
-            <section
-                class="relative mb-4 rounded-2xl border border-gray-200 bg-white/80 p-8 shadow-sm backdrop-blur-sm sm:p-10"
-            >
-                <BorderBeam :size="160" :duration="10" />
+        <section class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-6">
+            <div>
+                <h2 class="text-sm font-medium text-gray-600">Study time this week · Monday–Sunday</h2>
+                <p class="mt-1 text-3xl font-semibold text-gray-900">{{ week.minutes }} <span class="text-base font-normal">minutes</span></p>
+                <p class="mt-1 text-sm text-gray-500">{{ week.start }} – {{ week.end }}</p>
+            </div>
+            <Link href="/study-sessions" :class="linkClass">Log study time →</Link>
+        </section>
 
-                <p class="text-sm font-medium text-brand">Dashboard</p>
-                <h1
-                    class="mt-2 text-3xl font-semibold tracking-tight wrap-anywhere text-gray-900 sm:text-4xl"
-                >
-                    Welcome, <AuroraText>{{ userName }}</AuroraText>
-                </h1>
-                <p class="mt-3 max-w-xl text-gray-600">
-                    This is your home on StudyHub. Your account is ready to go.
-                </p>
+        <section class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-lg font-semibold">Courses in progress</h2>
+                <Link href="/courses" :class="linkClass">All courses</Link>
+            </div>
+            <p v-if="courses.data.length === 0" class="text-sm text-gray-600">No courses in progress. Open a course and set its status to “In progress” to start.</p>
+            <ul v-else class="grid gap-5 sm:grid-cols-2">
+                <li v-for="course in courses.data" :key="course.id" class="min-w-0">
+                    <Link :href="`/courses/${course.id}`" :class="[linkClass, 'wrap-anywhere']">{{ course.title }}</Link>
+                    <p class="mt-2 text-sm text-gray-600">{{ course.completed_lessons_count }} / {{ course.lessons_count }} lessons · {{ course.progress }}%</p>
+                    <progress :value="course.progress" max="100" :aria-label="`${course.title} progress`" class="mt-1 h-2 w-full accent-brand" />
+                </li>
+            </ul>
+            <PaginationLinks :pagination="courses" />
+        </section>
+
+        <div class="grid items-start gap-6 md:grid-cols-2">
+            <section class="min-w-0 rounded-2xl border border-gray-200 bg-white p-6">
+                <h2 class="mb-4 text-lg font-semibold">Unfinished lessons</h2>
+                <p v-if="lessons.data.length === 0" class="text-sm text-gray-600">No unfinished lessons. Add a lesson from a course when you are ready.</p>
+                <ul v-else class="flex flex-col gap-4">
+                    <li v-for="lesson in lessons.data" :key="lesson.id">
+                        <Link :href="`/courses/${lesson.course_id}/lessons/${lesson.id}`" :class="[linkClass, 'wrap-anywhere']">{{ lesson.title }}</Link>
+                        <p class="text-sm wrap-anywhere text-gray-500">{{ lesson.course_title }}</p>
+                    </li>
+                </ul>
+                <PaginationLinks :pagination="lessons" />
             </section>
-        </template>
-
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <BlurFade :delay="0.1" class="sm:col-span-2 lg:row-span-2">
-                <MagicCard class="grid h-full min-h-64 p-6">
-                    <div class="flex h-full flex-col items-center justify-center text-center">
-                        <span
-                            class="flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-brand"
-                        >
-                            <svg
-                                aria-hidden="true"
-                                class="size-7"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <path
-                                    d="M12 6.04A8.97 8.97 0 0 0 6 3.75c-1.05 0-2.06.18-3 .51v14.25A9 9 0 0 1 6 18c2.3 0 4.41.87 6 2.29m0-14.25a8.97 8.97 0 0 1 6-2.29c1.05 0 2.06.18 3 .51v14.25A9 9 0 0 0 18 18a8.97 8.97 0 0 0-6 2.29m0-14.25v14.25"
-                                />
-                            </svg>
-                        </span>
-                        <h2 class="mt-4 text-lg font-semibold tracking-tight text-gray-900">
-                            Your study space is empty
-                        </h2>
-                        <p class="mt-1 max-w-sm text-sm text-gray-600">
-                            New learning tools will show up here as they arrive on StudyHub.
-                        </p>
-                    </div>
-                </MagicCard>
-            </BlurFade>
-
-            <BlurFade :delay="0.18">
-                <MagicCard class="grid h-full p-6">
-                    <div class="flex min-w-0 items-center gap-4">
-                        <UserAvatar :name="userName" size="md" />
-                        <div class="min-w-0">
-                            <h2 class="text-sm font-medium text-gray-600">Account</h2>
-                            <p class="truncate font-semibold text-gray-900">{{ userName }}</p>
-                            <p class="mt-0.5 flex items-center gap-1.5 text-sm text-green-700">
-                                <span aria-hidden="true" class="size-1.5 rounded-full bg-green-600" />
-                                Signed in
-                            </p>
-                        </div>
-                    </div>
-                </MagicCard>
-            </BlurFade>
-
-            <BlurFade :delay="0.26">
-                <Link
-                    href="/settings/password"
-                    class="group block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                >
-                    <MagicCard class="grid h-full p-6">
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <h2 class="text-sm font-medium text-gray-600">Security</h2>
-                                <svg
-                                    aria-hidden="true"
-                                    class="size-4 text-gray-400 transition-all group-hover:translate-x-0.5 group-hover:text-brand motion-reduce:transition-none"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <path d="M5 12h14m-6-6 6 6-6 6" />
-                                </svg>
-                            </div>
-                            <p class="mt-1 font-semibold text-gray-900">Change password</p>
-                            <p class="mt-0.5 text-sm text-gray-600">
-                                Keep your account safe with a strong password.
-                            </p>
-                        </div>
-                    </MagicCard>
-                </Link>
-            </BlurFade>
+            <section class="min-w-0 rounded-2xl border border-gray-200 bg-white p-6">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-lg font-semibold">Recent notes</h2>
+                    <Link href="/notes/create" :class="linkClass">New note</Link>
+                </div>
+                <p v-if="notes.data.length === 0" class="text-sm text-gray-600">No notes yet. Save a takeaway from your next lesson.</p>
+                <ul v-else class="flex flex-col gap-4">
+                    <li v-for="note in notes.data" :key="note.id">
+                        <Link :href="`/notes/${note.id}`" :class="[linkClass, 'wrap-anywhere']">{{ note.title }}</Link>
+                    </li>
+                </ul>
+                <PaginationLinks :pagination="notes" />
+            </section>
         </div>
     </AppLayout>
 </template>

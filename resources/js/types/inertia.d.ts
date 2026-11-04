@@ -7,6 +7,9 @@ export interface AuthUser {
 
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
+        flashDataType: {
+            success?: string;
+        };
         sharedPageProps: {
             auth: {
                 user: AuthUser | null;
