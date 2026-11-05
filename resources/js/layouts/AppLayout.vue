@@ -35,6 +35,7 @@ const navigationLinks = [
     },
 ];
 
+const profileLinkHref = '/settings/profile';
 const passwordLinkHref = '/settings/password';
 
 const page = usePage();
@@ -179,10 +180,14 @@ async function hideSidebar(): Promise<void> {
             </nav>
 
             <div class="flex flex-col gap-3 border-t border-line p-4 text-sm">
-                <div class="flex min-w-0 items-center gap-3">
+                <Link
+                    :href="profileLinkHref"
+                    :aria-current="isCurrentLink(profileLinkHref) ? 'page' : undefined"
+                    class="-m-1.5 flex min-w-0 items-center gap-3 rounded-lg p-1.5 text-ink transition-colors hover:bg-sunken aria-[current=page]:bg-sunken"
+                >
                     <UserAvatar :name="userName" />
-                    <span class="truncate font-medium text-ink">{{ userName }}</span>
-                </div>
+                    <span class="truncate font-medium">{{ userName }}</span>
+                </Link>
                 <div class="flex items-center justify-between gap-2">
                     <Link
                         :href="passwordLinkHref"
