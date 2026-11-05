@@ -49,6 +49,9 @@ Khai báo các biến sau trong `.env`:
 | `DOCKER_DB_PORT` | Không | `3306` | Cổng database |
 | `DOCKER_DB_SSL_CA` | Không | CA của AWS trong image | Để trống khi dùng MySQL local không có TLS |
 | `DOCKER_APP_PORT` | Không | `8080` | Cổng trên máy host |
+| `TURNSTILE_ENABLED` | Không | `false` | Bật Cloudflare Turnstile cho form đăng nhập và đăng ký |
+| `TURNSTILE_SITE_KEY` | Khi bật Turnstile | | Site key của widget |
+| `TURNSTILE_SECRET_KEY` | Khi bật Turnstile | | Secret key để xác minh token |
 
 ```bash
 docker compose up -d --build   # build image, chạy migration rồi khởi động
