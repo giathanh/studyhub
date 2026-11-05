@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GithubCourseImportController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudySessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,7 @@ Route::inertia('/', 'Home')->name('home');
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/settings/profile', ProfileController::class)->name('settings.profile');
     Route::inertia('/settings/password', 'Settings/Password')->name('settings.password');
 
     Route::get('/courses/import', [CourseImportController::class, 'create'])->name('courses.import.create');
