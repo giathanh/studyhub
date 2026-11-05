@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Rules\Turnstile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -22,6 +23,10 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        Validator::make($input, [
+            Turnstile::RESPONSE_FIELD => [new Turnstile],
+        ])->validate();
+
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [

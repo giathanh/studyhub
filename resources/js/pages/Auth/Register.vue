@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { Form, Link } from '@inertiajs/vue3';
+import { useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
 import ShimmerButton from '@/components/ShimmerButton.vue';
+import TurnstileWidget from '@/components/TurnstileWidget.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+
+defineProps<{
+    turnstileSiteKey: string | null;
+}>();
+
+const turnstile = useTemplateRef<InstanceType<typeof TurnstileWidget>>('turnstile');
 </script>
 
 <template>
@@ -12,6 +20,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
             method="post"
             :reset-on-error="['password', 'password_confirmation']"
             class="space-y-4"
+            @error="turnstile?.reset()"
             #default="{ errors, processing }"
         >
             <FormField
@@ -41,6 +50,13 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
                 type="password"
                 autocomplete="new-password"
                 :error="errors.password_confirmation"
+            />
+
+            <TurnstileWidget
+                v-if="turnstileSiteKey"
+                ref="turnstile"
+                :site-key="turnstileSiteKey"
+                :error="errors['cf-turnstile-response']"
             />
 
             <ShimmerButton type="submit" :disabled="processing" class="w-full">
