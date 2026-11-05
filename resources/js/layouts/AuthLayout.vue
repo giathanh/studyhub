@@ -1,46 +1,43 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AnimatedGridPattern from '@/components/AnimatedGridPattern.vue';
-import AuroraText from '@/components/AuroraText.vue';
-import BlurFade from '@/components/BlurFade.vue';
-import BorderBeam from '@/components/BorderBeam.vue';
+import BrandMark from '@/components/BrandMark.vue';
 
 defineProps<{
     title: string;
 }>();
+
+const highlights = [
+    'Courses and lessons written in Markdown',
+    'Notes linked to what you are studying',
+    'A weekly count of the time you put in',
+];
 </script>
 
 <template>
-    <main
-        class="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 px-4 py-10"
-    >
+    <div class="grid min-h-screen bg-paper lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <Head :title="title" />
 
-        <AnimatedGridPattern
-            class="text-brand mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
-            :num-squares="30"
-            :max-opacity="0.3"
-            :duration="3"
-        />
+        <aside class="hidden flex-col justify-between bg-ink p-12 text-paper lg:flex">
+            <p class="font-serif text-4xl leading-tight font-medium tracking-tight xl:text-5xl">
+                Keep what you learn where you can find it.
+            </p>
+            <ul class="flex flex-col gap-3 border-t border-paper/20 pt-6 text-sm text-paper/80">
+                <li v-for="highlight in highlights" :key="highlight">{{ highlight }}</li>
+            </ul>
+        </aside>
 
-        <BlurFade class="relative w-full max-w-sm">
-            <Link href="/" class="block text-center text-2xl font-semibold tracking-tight">
-                <AuroraText>StudyHub</AuroraText>
-            </Link>
+        <main class="flex items-center justify-center px-4 py-12">
+            <div class="w-full max-w-sm animate-page-in motion-reduce:animate-none">
+                <Link href="/" class="inline-block rounded text-2xl">
+                    <BrandMark />
+                </Link>
 
-            <section
-                class="relative mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-            >
-                <BorderBeam :size="120" :duration="8" />
-
-                <h1 class="text-xl font-semibold tracking-tight text-gray-900">
+                <h1 class="mt-8 mb-6 font-serif text-3xl font-medium tracking-tight text-ink">
                     {{ title }}
                 </h1>
 
-                <div class="mt-6">
-                    <slot />
-                </div>
-            </section>
-        </BlurFade>
-    </main>
+                <slot />
+            </div>
+        </main>
+    </div>
 </template>

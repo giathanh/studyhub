@@ -10,17 +10,17 @@ const props = defineProps<{
 const blocks = computed(() => parseMarkdownBlocks(props.content));
 
 const headingClasses: Record<number, string> = {
-    1: 'text-xl font-semibold text-gray-900',
-    2: 'text-lg font-semibold text-gray-900',
-    3: 'text-base font-semibold text-gray-900',
-    4: 'text-sm font-semibold text-gray-900',
-    5: 'text-sm font-medium text-gray-900',
-    6: 'text-xs font-medium uppercase tracking-wide text-gray-600',
+    1: 'pt-2 text-3xl leading-tight font-medium tracking-tight text-ink',
+    2: 'pt-2 text-2xl leading-snug font-medium tracking-tight text-ink',
+    3: 'pt-1 text-xl leading-snug font-medium text-ink',
+    4: 'text-lg font-semibold text-ink',
+    5: 'text-base font-semibold text-ink',
+    6: 'font-sans text-xs font-medium tracking-wide text-ink-soft uppercase',
 };
 </script>
 
 <template>
-    <div class="space-y-4 text-sm leading-relaxed wrap-anywhere text-gray-800">
+    <div class="space-y-4 font-serif text-lg leading-relaxed wrap-anywhere text-ink">
         <template v-for="block in blocks" :key="block.id">
             <component
                 :is="`h${block.level ?? 2}`"
@@ -32,19 +32,19 @@ const headingClasses: Record<number, string> = {
 
             <pre
                 v-else-if="block.type === 'code'"
-                class="overflow-x-auto rounded-xl border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-relaxed text-gray-100"
+                class="overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[0.8125rem] leading-relaxed text-paper"
             ><code>{{ block.code }}</code></pre>
 
             <blockquote
                 v-else-if="block.type === 'blockquote'"
-                class="border-l-4 border-brand/40 pl-4 whitespace-pre-line text-gray-600 italic"
+                class="border-l-4 border-highlight pl-4 whitespace-pre-line text-ink-soft italic"
             >
                 <MarkdownInline :tokens="block.tokens ?? []" />
             </blockquote>
 
             <ul
                 v-else-if="block.type === 'ul'"
-                class="list-disc space-y-1.5 pl-5 text-gray-800"
+                class="list-disc space-y-1.5 pl-5 text-ink"
             >
                 <li
                     v-for="item in block.items"
@@ -65,7 +65,7 @@ const headingClasses: Record<number, string> = {
 
             <ol
                 v-else-if="block.type === 'ol'"
-                class="list-decimal space-y-1.5 pl-5 text-gray-800"
+                class="list-decimal space-y-1.5 pl-5 text-ink"
             >
                 <li
                     v-for="item in block.items"
@@ -84,18 +84,18 @@ const headingClasses: Record<number, string> = {
                 </li>
             </ol>
 
-            <div v-else-if="block.type === 'table'" class="max-w-full overflow-x-auto rounded-lg border border-gray-200">
-                <table class="w-full border-collapse text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-900">
+            <div v-else-if="block.type === 'table'" class="max-w-full overflow-x-auto rounded-lg border border-line">
+                <table class="w-full border-collapse text-left font-sans text-sm">
+                    <thead class="bg-paper text-ink">
                         <tr>
                             <th v-for="column in block.columns" :key="column.id" scope="col"
                                 :style="{ textAlign: column.align }"
-                                class="border-b border-gray-200 px-4 py-3 font-semibold">
+                                class="border-b border-line px-4 py-3 font-semibold">
                                 <MarkdownInline :tokens="column.tokens" />
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-line">
                         <tr v-for="row in block.rows" :key="row.id">
                             <td v-for="(cell, index) in row.cells" :key="cell.id"
                                 :style="{ textAlign: block.columns?.[index]?.align }"
@@ -107,7 +107,7 @@ const headingClasses: Record<number, string> = {
                 </table>
             </div>
 
-            <hr v-else-if="block.type === 'hr'" class="border-gray-200" />
+            <hr v-else-if="block.type === 'hr'" class="border-line" />
 
             <p v-else class="whitespace-pre-line">
                 <MarkdownInline :tokens="block.tokens ?? []" />

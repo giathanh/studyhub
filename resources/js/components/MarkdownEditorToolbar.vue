@@ -189,16 +189,16 @@ function removeLink(): void {
 const toolButtonClass =
     'inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-40';
 const textButtonClass =
-    'cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-brand';
+    'cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-ink-soft transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-brand';
 </script>
 
 <template>
-    <div class="border-b border-gray-200 bg-gray-50">
+    <div class="border-b border-line bg-paper">
         <div role="toolbar" aria-label="Formatting" class="flex flex-wrap items-center gap-x-2 gap-y-1 p-1.5">
             <select
                 aria-label="Text style"
                 :value="blockStyle"
-                class="h-8 cursor-pointer rounded-md border border-gray-300 bg-white px-2 text-xs text-gray-800 focus-visible:outline-2 focus-visible:outline-brand"
+                class="h-8 cursor-pointer rounded-md border border-line-strong bg-surface px-2 text-xs text-ink focus-visible:outline-2 focus-visible:outline-brand"
                 @change="applyBlockStyle"
             >
                 <option value="paragraph">Paragraph</option>
@@ -220,7 +220,7 @@ const textButtonClass =
                         toolButtonClass,
                         action.isActive?.()
                             ? 'bg-brand/15 text-brand'
-                            : 'text-gray-700 hover:bg-gray-200',
+                            : 'text-ink-soft hover:bg-sunken',
                     ]"
                     @mousedown.prevent
                     @click="action.run"
@@ -243,7 +243,7 @@ const textButtonClass =
 
         <div
             v-if="editor.isActive('table')"
-            class="flex flex-wrap items-center gap-1 border-t border-gray-200 px-1.5 py-1"
+            class="flex flex-wrap items-center gap-1 border-t border-line px-1.5 py-1"
         >
             <button
                 v-for="action in tableActions"
@@ -257,7 +257,7 @@ const textButtonClass =
             </button>
         </div>
 
-        <div v-if="isLinkFormOpen" class="border-t border-gray-200 p-1.5">
+        <div v-if="isLinkFormOpen" class="border-t border-line p-1.5">
             <div class="flex flex-wrap items-center gap-1">
                 <input
                     ref="linkField"
@@ -266,7 +266,7 @@ const textButtonClass =
                     aria-label="Link address"
                     placeholder="https://example.com"
                     :aria-invalid="linkError ? 'true' : undefined"
-                    class="h-8 min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-2 text-sm focus:border-brand focus:outline-none aria-invalid:border-red-500"
+                    class="h-8 min-w-48 flex-1 rounded-md border border-line-strong bg-surface px-2 text-sm focus:border-brand focus:outline-none aria-invalid:border-danger"
                     @keydown.enter.prevent="applyLink"
                     @keydown.esc.prevent="toggleLinkForm"
                 />
@@ -276,7 +276,7 @@ const textButtonClass =
                 </button>
                 <button type="button" :class="textButtonClass" @click="toggleLinkForm">Cancel</button>
             </div>
-            <p v-if="linkError" role="alert" class="mt-1 text-xs text-red-600">{{ linkError }}</p>
+            <p v-if="linkError" role="alert" class="mt-1 text-xs text-danger">{{ linkError }}</p>
         </div>
     </div>
 </template>

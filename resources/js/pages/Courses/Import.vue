@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import GithubCourseImport from '@/components/GithubCourseImport.vue';
 import FormField from '@/components/FormField.vue';
-import MagicCard from '@/components/MagicCard.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import AppLayout from '@/layouts/AppLayout.vue';
 
@@ -141,23 +142,25 @@ async function submit(): Promise<void> {
 
     form.post('/courses/import');
 }
-
-const pickerClass =
-    'cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand hover:bg-gray-100';
 </script>
 
 <template>
     <AppLayout title="Import Markdown">
+        <template #heading>
+            <PageHeader title="Import Markdown" back-href="/courses" back-label="Courses" />
+        </template>
+
         <GithubCourseImport />
-        <MagicCard class="max-w-2xl p-6">
-            <form class="space-y-5" @submit.prevent="submit">
+        <AppCard class="max-w-2xl p-6">
+            <h2 class="font-serif text-xl font-medium tracking-tight text-ink">Import from your computer</h2>
+            <form class="mt-1 space-y-5" @submit.prevent="submit">
                 <div>
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-ink-soft">
                         Choose a folder of .md files, or one or more files. Nothing is saved until you
                         import.
                     </p>
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <label :class="pickerClass">
+                        <AppButton as="label" variant="secondary" class="has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand">
                             Choose folder
                             <input
                                 type="file"
@@ -165,8 +168,8 @@ const pickerClass =
                                 class="sr-only"
                                 @change="chooseFiles"
                             />
-                        </label>
-                        <label :class="pickerClass">
+                        </AppButton>
+                        <AppButton as="label" variant="secondary" class="has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand">
                             Choose files
                             <input
                                 type="file"
@@ -175,16 +178,16 @@ const pickerClass =
                                 class="sr-only"
                                 @change="chooseFiles"
                             />
-                        </label>
+                        </AppButton>
                     </div>
                 </div>
 
                 <template v-if="markdownFiles.length > 0">
                     <fieldset>
-                        <legend class="text-sm font-medium text-gray-900">
+                        <legend class="text-sm font-medium text-ink">
                             {{ selectedFiles.length }} of {{ markdownFiles.length }} files selected
                         </legend>
-                        <ul class="mt-2 max-h-72 divide-y divide-gray-200 overflow-y-auto rounded-lg border border-gray-200">
+                        <ul class="mt-2 max-h-72 divide-y divide-line overflow-y-auto rounded-lg border border-line">
                             <li v-for="group in groups" :key="group.name">
                                 <label class="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm">
                                     <input
@@ -193,12 +196,12 @@ const pickerClass =
                                         :checked="!excludedGroups.includes(group.name)"
                                         @change="toggleGroup(group.name)"
                                     />
-                                    <span class="min-w-0 flex-1 wrap-anywhere text-gray-900">{{ group.name }}</span>
-                                    <span class="shrink-0 text-gray-500">{{ group.fileCount }}</span>
+                                    <span class="min-w-0 flex-1 wrap-anywhere text-ink">{{ group.name }}</span>
+                                    <span class="shrink-0 text-ink-faint">{{ group.fileCount }}</span>
                                 </label>
                             </li>
                         </ul>
-                        <p class="mt-2 text-sm text-gray-500">{{ importHint }}</p>
+                        <p class="mt-2 text-sm text-ink-faint">{{ importHint }}</p>
                     </fieldset>
 
                     <div>
@@ -210,29 +213,29 @@ const pickerClass =
                             :error="form.errors.title"
                             @input="form.title = ($event.target as HTMLInputElement).value"
                         />
-                        <p v-if="selectedFiles.length === 1" class="mt-1 text-sm text-gray-500">
+                        <p v-if="selectedFiles.length === 1" class="mt-1 text-sm text-ink-faint">
                             Leave blank to use the file's H1.
                         </p>
                     </div>
                 </template>
 
-                <p v-else class="rounded-lg bg-gray-50 px-4 py-6 text-center text-sm text-gray-600">
+                <p v-else class="rounded-lg bg-paper px-4 py-6 text-center text-sm text-ink-soft">
                     No Markdown files chosen yet.
                 </p>
 
-                <ul v-if="errorMessages.length > 0" role="alert" class="space-y-1 text-sm text-red-600">
+                <ul v-if="errorMessages.length > 0" role="alert" class="space-y-1 text-sm text-danger">
                     <li v-for="message in errorMessages" :key="message" class="wrap-anywhere">
                         {{ message }}
                     </li>
                 </ul>
 
-                <ShimmerButton
+                <AppButton
                     type="submit"
                     :disabled="selectedFiles.length === 0 || isReadingFiles || form.processing"
                 >
                     {{ isReadingFiles || form.processing ? 'Importing…' : 'Import course' }}
-                </ShimmerButton>
+                </AppButton>
             </form>
-        </MagicCard>
+        </AppCard>
     </AppLayout>
 </template>

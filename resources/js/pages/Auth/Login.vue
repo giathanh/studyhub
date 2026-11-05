@@ -2,7 +2,7 @@
 import { Form, Link } from '@inertiajs/vue3';
 import { useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
 import TurnstileWidget from '@/components/TurnstileWidget.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 
@@ -39,7 +39,7 @@ const turnstile = useTemplateRef<InstanceType<typeof TurnstileWidget>>('turnstil
                 :error="errors.password"
             />
 
-            <label class="flex items-center gap-2 text-sm text-gray-700">
+            <label class="flex items-center gap-2 text-sm text-ink-soft">
                 <input type="checkbox" name="remember" class="size-4 accent-brand" />
                 Remember me
             </label>
@@ -51,12 +51,12 @@ const turnstile = useTemplateRef<InstanceType<typeof TurnstileWidget>>('turnstil
                 :error="errors['cf-turnstile-response']"
             />
 
-            <ShimmerButton type="submit" :disabled="processing" class="w-full">
+            <AppButton type="submit" :disabled="processing" class="w-full">
                 {{ processing ? 'Logging in…' : 'Log in' }}
-            </ShimmerButton>
+            </AppButton>
         </Form>
 
-        <p class="mt-4 text-center text-sm text-gray-600">
+        <p class="mt-6 text-sm text-ink-soft">
             No account yet?
             <Link href="/register" class="font-medium text-brand underline underline-offset-4">
                 Register

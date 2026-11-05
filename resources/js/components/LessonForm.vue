@@ -4,9 +4,9 @@ import { Form } from '@inertiajs/vue3';
 import { useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
 import FormSelect from '@/components/FormSelect.vue';
-import MagicCard from '@/components/MagicCard.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import type { Lesson, StatusOption } from '@/types/course';
 
@@ -31,7 +31,7 @@ useUnsavedChanges(() =>
 </script>
 
 <template>
-    <MagicCard class="p-6">
+    <AppCard class="p-6">
         <Form
             ref="formRef"
             :action="action"
@@ -64,9 +64,9 @@ useUnsavedChanges(() =>
                 :error="errors.content"
             />
 
-            <ShimmerButton type="submit" :disabled="processing">
+            <AppButton type="submit" :disabled="processing">
                 {{ processing ? 'Saving…' : submitLabel }}
-            </ShimmerButton>
+            </AppButton>
         </Form>
-    </MagicCard>
+    </AppCard>
 </template>

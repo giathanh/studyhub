@@ -4,84 +4,76 @@
 @source '../../storage/framework/views/*.php';
 
 @theme static {
-    --color-brand: #7c3aed;
-    --color-brand-accent: #db2777;
+    --color-paper: #f8f8f4;
+    --color-surface: #ffffff;
+    --color-sunken: #efefe8;
+    --color-line: #e1e1d8;
+    --color-line-strong: #8a8d9c;
+
+    --color-ink: #171d3a;
+    --color-ink-soft: #484e66;
+    --color-ink-faint: #62677c;
+
+    --color-brand: #2536a3;
+    --color-brand-strong: #1b2980;
+    --color-highlight: #ffe45c;
+    --color-highlight-soft: #fff6c2;
+
+    --color-success: #17674a;
+    --color-success-soft: #e2f3ea;
+    --color-danger: #b3261e;
+    --color-danger-strong: #8f1d17;
+    --color-danger-soft: #fcebe9;
+    --color-warning-soft: #fdf3d7;
+    --color-warning-line: #e9d48e;
+    --color-warning-ink: #6b4e00;
 }
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Newsreader', ui-serif, Georgia, Cambria, 'Times New Roman', serif;
 }
 
 @theme inline {
-    --animate-aurora: aurora 10s ease-in-out infinite alternate;
-    --animate-blur-fade: blur-fade var(--blur-fade-duration) ease-out var(--blur-fade-delay) backwards;
-    --animate-border-beam: border-beam var(--border-beam-duration) linear infinite;
-    --animate-grid-square: grid-square var(--grid-square-duration) ease-in-out var(--grid-square-delay) 2 alternate both;
-    --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
-    --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+    --animate-page-in: page-in 0.25s ease-out backwards;
 
-    @keyframes aurora {
-        0% {
-            background-position: 0% 50%;
-        }
-        25% {
-            background-position: 50% 100%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        75% {
-            background-position: 50% 0%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    @keyframes blur-fade {
+    @keyframes page-in {
         from {
             opacity: 0;
-            filter: blur(var(--blur-fade-blur));
-            transform: translate(var(--blur-fade-x), var(--blur-fade-y));
+            transform: translateY(4px);
         }
+    }
+}
+
+@layer base {
+    html {
+        background-color: var(--color-paper);
+        color: var(--color-ink);
     }
 
-    @keyframes border-beam {
-        to {
-            offset-distance: 100%;
-        }
+    :focus-visible {
+        outline: 2px solid var(--color-brand);
+        outline-offset: 2px;
     }
 
-    @keyframes grid-square {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: var(--grid-square-max-opacity);
-        }
+    ::selection {
+        background-color: var(--color-highlight);
+        color: var(--color-ink);
     }
+}
 
-    @keyframes shimmer-slide {
-        to {
-            transform: translate(calc(100cqw - 100%), 0);
-        }
-    }
+/* A highlighter stroke across the lower part of the text. Keep the text ink-coloured for contrast. */
+@utility marker {
+    background-image: linear-gradient(
+        transparent 56%,
+        var(--color-highlight) 56%,
+        var(--color-highlight) 92%,
+        transparent 92%
+    );
+    box-decoration-break: clone;
+}
 
-    @keyframes spin-around {
-        0% {
-            transform: translateZ(0) rotate(0);
-        }
-        15%,
-        35% {
-            transform: translateZ(0) rotate(90deg);
-        }
-        65%,
-        85% {
-            transform: translateZ(0) rotate(270deg);
-        }
-        100% {
-            transform: translateZ(0) rotate(360deg);
-        }
-    }
+@utility control {
+    @apply block w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm text-ink transition-[border-color,box-shadow] placeholder:text-ink-faint focus:border-brand focus:ring-3 focus:ring-brand/20 focus:outline-none disabled:bg-sunken disabled:text-ink-faint aria-invalid:border-danger;
 }

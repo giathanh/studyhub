@@ -35,7 +35,7 @@ onUnmounted(() => {
             v-if="isVisible"
             type="button"
             aria-label="Scroll to top"
-            class="fixed right-4 bottom-4 z-10 flex size-11 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-md transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:right-6 sm:bottom-6"
+            class="fixed right-4 bottom-4 z-10 flex size-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-ink-soft shadow-sm transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:right-6 sm:bottom-6"
             @click="scrollToTop"
         >
             <svg

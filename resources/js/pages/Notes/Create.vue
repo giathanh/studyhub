@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
 import NoteForm from '@/components/NoteForm.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { CourseOption } from '@/types/course';
 
@@ -13,7 +13,10 @@ defineProps<{
 
 <template>
     <AppLayout title="New note">
-        <Link href="/notes" class="mb-4 inline-block text-sm font-medium text-brand">← Notes</Link>
+        <template #heading>
+            <PageHeader title="New note" back-href="/notes" back-label="Notes" />
+        </template>
+
         <NoteForm
             action="/notes"
             method="post"

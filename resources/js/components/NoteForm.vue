@@ -3,9 +3,9 @@ import type { FormComponentRef } from '@inertiajs/core';
 import { Form } from '@inertiajs/vue3';
 import { computed, ref, useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
-import MagicCard from '@/components/MagicCard.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import type { CourseOption, Note } from '@/types/course';
 
@@ -70,12 +70,10 @@ function handleCourseChange(event: Event): void {
     }
 }
 
-const selectClass =
-    'mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs transition-shadow focus:border-brand focus:ring-3 focus:ring-brand/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 aria-invalid:border-red-500';
 </script>
 
 <template>
-    <MagicCard class="p-6">
+    <AppCard class="p-6">
         <Form
             ref="formRef"
             :action="action"
@@ -87,7 +85,7 @@ const selectClass =
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label for="course_id" class="block text-sm font-medium text-gray-900">
+                    <label for="course_id" class="block text-sm font-medium text-ink">
                         Course (optional)
                     </label>
                     <select
@@ -96,7 +94,7 @@ const selectClass =
                         :value="selectedCourseId"
                         :aria-invalid="errors.course_id ? 'true' : undefined"
                         :aria-describedby="errors.course_id ? 'course_id-error' : undefined"
-                        :class="selectClass"
+                        class="control mt-1.5"
                         @change="handleCourseChange"
                     >
                         <option value="">Standalone note</option>
@@ -104,13 +102,13 @@ const selectClass =
                             {{ course.title }}
                         </option>
                     </select>
-                    <p v-if="errors.course_id" id="course_id-error" class="mt-1 text-sm text-red-600">
+                    <p v-if="errors.course_id" id="course_id-error" class="mt-1 text-sm text-danger">
                         {{ errors.course_id }}
                     </p>
                 </div>
 
                 <div>
-                    <label for="lesson_id" class="block text-sm font-medium text-gray-900">
+                    <label for="lesson_id" class="block text-sm font-medium text-ink">
                         Lesson (optional)
                     </label>
                     <select
@@ -120,7 +118,7 @@ const selectClass =
                         :disabled="selectedCourseId === ''"
                         :aria-invalid="errors.lesson_id ? 'true' : undefined"
                         :aria-describedby="errors.lesson_id ? 'lesson_id-error' : undefined"
-                        :class="selectClass"
+                        class="control mt-1.5"
                     >
                         <option value="">
                             {{ selectedCourseId === '' ? 'Choose a course first' : 'No specific lesson' }}
@@ -133,7 +131,7 @@ const selectClass =
                             {{ lesson.title }}
                         </option>
                     </select>
-                    <p v-if="errors.lesson_id" id="lesson_id-error" class="mt-1 text-sm text-red-600">
+                    <p v-if="errors.lesson_id" id="lesson_id-error" class="mt-1 text-sm text-danger">
                         {{ errors.lesson_id }}
                     </p>
                 </div>
@@ -148,9 +146,9 @@ const selectClass =
                 :error="errors.body"
             />
 
-            <ShimmerButton type="submit" :disabled="processing">
+            <AppButton type="submit" :disabled="processing">
                 {{ processing ? 'Saving…' : submitLabel }}
-            </ShimmerButton>
+            </AppButton>
         </Form>
-    </MagicCard>
+    </AppCard>
 </template>

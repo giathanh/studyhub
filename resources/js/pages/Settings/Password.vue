@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
 import FormField from '@/components/FormField.vue';
-import MagicCard from '@/components/MagicCard.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 </script>
 
 <template>
     <AppLayout title="Change password">
-        <MagicCard class="max-w-md p-6">
+        <AppCard class="max-w-md p-6">
             <Form
                 action="/user/password"
                 method="put"
@@ -45,18 +45,18 @@ import AppLayout from '@/layouts/AppLayout.vue';
                 />
 
                 <div class="flex items-center gap-3">
-                    <ShimmerButton type="submit" :disabled="processing">
+                    <AppButton type="submit" :disabled="processing">
                         {{ processing ? 'Saving…' : 'Save' }}
-                    </ShimmerButton>
+                    </AppButton>
                     <p
                         v-if="recentlySuccessful"
                         role="status"
-                        class="text-sm text-green-700"
+                        class="text-sm text-success"
                     >
                         Password updated.
                     </p>
                 </div>
             </Form>
-        </MagicCard>
+        </AppCard>
     </AppLayout>
 </template>

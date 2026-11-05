@@ -128,12 +128,12 @@ const tabButtonClass =
             <label
                 :id="`${name}-label`"
                 :for="name"
-                class="block text-sm font-medium text-gray-900"
+                class="block text-sm font-medium text-ink"
                 @click="focusVisualEditor"
             >
                 {{ label }}
             </label>
-            <div role="tablist" aria-label="Editor mode" class="inline-flex rounded-lg bg-gray-100 p-0.5">
+            <div role="tablist" aria-label="Editor mode" class="inline-flex rounded-lg bg-sunken p-0.5">
                 <button
                     v-for="mode in modes"
                     :key="mode.value"
@@ -143,8 +143,8 @@ const tabButtonClass =
                     :class="[
                         tabButtonClass,
                         activeMode === mode.value
-                            ? 'bg-white text-gray-900 shadow-2xs'
-                            : 'text-gray-600 hover:text-gray-900',
+                            ? 'bg-surface text-ink shadow-2xs'
+                            : 'text-ink-soft hover:text-ink',
                     ]"
                     @click="selectMode(mode.value)"
                 >
@@ -156,7 +156,7 @@ const tabButtonClass =
         <p
             v-if="notice"
             role="status"
-            class="mt-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+            class="mt-1.5 rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-warning-ink"
         >
             {{ notice }}
         </p>
@@ -164,8 +164,8 @@ const tabButtonClass =
         <div
             v-if="!hasVisualFailed"
             v-show="activeMode === 'visual'"
-            class="mt-1.5 overflow-hidden rounded-lg border bg-white shadow-xs transition-shadow focus-within:border-brand focus-within:ring-3 focus-within:ring-brand/20"
-            :class="error ? 'border-red-500' : 'border-gray-300'"
+            class="mt-1.5 overflow-hidden rounded-lg border bg-surface shadow-xs transition-shadow focus-within:border-brand focus-within:ring-3 focus-within:ring-brand/20"
+            :class="error ? 'border-danger' : 'border-line-strong'"
         >
             <div
                 v-if="!isVisualReady"
@@ -173,11 +173,11 @@ const tabButtonClass =
                 class="animate-pulse"
                 :style="{ minHeight: `${rows * 1.5}rem` }"
             >
-                <div class="h-11 border-b border-gray-200 bg-gray-50" />
+                <div class="h-11 border-b border-line bg-paper" />
                 <div class="space-y-3 p-4">
-                    <div class="h-4 w-1/3 rounded bg-gray-200" />
-                    <div class="h-3 w-5/6 rounded bg-gray-100" />
-                    <div class="h-3 w-2/3 rounded bg-gray-100" />
+                    <div class="h-4 w-1/3 rounded bg-sunken" />
+                    <div class="h-3 w-5/6 rounded bg-sunken" />
+                    <div class="h-3 w-2/3 rounded bg-sunken" />
                 </div>
             </div>
             <MarkdownVisualEditor
@@ -202,19 +202,19 @@ const tabButtonClass =
             :required="required && activeMode === 'markdown'"
             :aria-invalid="error ? 'true' : undefined"
             :aria-describedby="error ? `${name}-error` : undefined"
-            class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm shadow-xs transition-shadow focus:border-brand focus:ring-3 focus:ring-brand/20 focus:outline-none aria-invalid:border-red-500"
+            class="control mt-1.5 font-mono"
         />
 
         <div
             v-if="activeMode === 'preview'"
-            class="mt-1.5 min-h-48 rounded-lg border border-gray-200 bg-gray-50/60 p-4"
+            class="mt-1.5 min-h-48 rounded-lg border border-line bg-paper/60 p-4"
         >
             <MarkdownContent v-if="draft.trim() !== ''" :content="draft" />
-            <p v-else class="text-sm text-gray-500">Nothing to preview yet.</p>
+            <p v-else class="text-sm text-ink-faint">Nothing to preview yet.</p>
         </div>
 
-        <p v-if="hint" class="mt-1 text-sm text-gray-500">{{ hint }}</p>
-        <p v-if="error" :id="`${name}-error`" class="mt-1 text-sm text-red-600">
+        <p v-if="hint" class="mt-1 text-sm text-ink-faint">{{ hint }}</p>
+        <p v-if="error" :id="`${name}-error`" class="mt-1 text-sm text-danger">
             {{ error }}
         </p>
     </div>
