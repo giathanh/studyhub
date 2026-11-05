@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
 import NoteForm from '@/components/NoteForm.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { CourseOption, Note } from '@/types/course';
 
@@ -12,9 +12,10 @@ defineProps<{
 
 <template>
     <AppLayout title="Edit note">
-        <Link :href="`/notes/${note.data.id}`" class="mb-4 inline-block text-sm font-medium text-brand">
-            ← {{ note.data.title }}
-        </Link>
+        <template #heading>
+            <PageHeader title="Edit note" :back-href="`/notes/${note.data.id}`" :back-label="note.data.title" />
+        </template>
+
         <NoteForm
             :action="`/notes/${note.data.id}`"
             method="put"

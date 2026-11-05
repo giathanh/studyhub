@@ -95,35 +95,35 @@ defineExpose({ keepsContent, load, focus });
 @reference '../../css/app.css';
 
 .visual-editor .tiptap {
-    @apply min-h-[inherit] space-y-4 px-4 py-3 text-sm leading-relaxed wrap-anywhere text-gray-800 outline-none;
+    @apply min-h-[inherit] space-y-4 px-4 py-3 font-serif text-lg leading-relaxed wrap-anywhere text-ink outline-none;
 }
 
 .visual-editor h1 {
-    @apply text-xl font-semibold text-gray-900;
+    @apply pt-2 text-3xl leading-tight font-medium tracking-tight text-ink;
 }
 
 .visual-editor h2 {
-    @apply text-lg font-semibold text-gray-900;
+    @apply pt-2 text-2xl leading-snug font-medium tracking-tight text-ink;
 }
 
 .visual-editor h3 {
-    @apply text-base font-semibold text-gray-900;
+    @apply pt-1 text-xl leading-snug font-medium text-ink;
 }
 
 .visual-editor h4 {
-    @apply text-sm font-semibold text-gray-900;
+    @apply text-lg font-semibold text-ink;
 }
 
 .visual-editor h5 {
-    @apply text-sm font-medium text-gray-900;
+    @apply text-base font-semibold text-ink;
 }
 
 .visual-editor h6 {
-    @apply text-xs font-medium tracking-wide text-gray-600 uppercase;
+    @apply font-sans text-xs font-medium tracking-wide text-ink-soft uppercase;
 }
 
 .visual-editor strong {
-    @apply font-semibold text-gray-900;
+    @apply font-semibold text-ink;
 }
 
 .visual-editor a {
@@ -131,15 +131,15 @@ defineExpose({ keepsContent, load, focus });
 }
 
 .visual-editor :not(pre) > code {
-    @apply rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900;
+    @apply rounded bg-sunken px-1.5 py-0.5 font-mono text-[0.8em] text-ink;
 }
 
 .visual-editor pre {
-    @apply overflow-x-auto rounded-xl border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-relaxed text-gray-100;
+    @apply overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[0.8125rem] leading-relaxed text-paper;
 }
 
 .visual-editor blockquote {
-    @apply border-l-4 border-brand/40 pl-4 text-gray-600 italic;
+    @apply border-l-4 border-highlight pl-4 text-ink-soft italic;
 }
 
 .visual-editor ul {
@@ -167,7 +167,7 @@ defineExpose({ keepsContent, load, focus });
 }
 
 .visual-editor hr {
-    @apply border-gray-200;
+    @apply border-line;
 }
 
 .visual-editor hr.ProseMirror-selectednode {
@@ -175,16 +175,16 @@ defineExpose({ keepsContent, load, focus });
 }
 
 .visual-editor table {
-    @apply w-full border-collapse text-left text-sm;
+    @apply w-full border-collapse text-left font-sans text-sm;
 }
 
 .visual-editor th,
 .visual-editor td {
-    @apply relative min-w-32 border border-gray-200 px-4 py-3 align-top;
+    @apply relative min-w-32 border border-line px-4 py-3 align-top;
 }
 
 .visual-editor th {
-    @apply bg-gray-50 font-semibold text-gray-900;
+    @apply bg-paper font-semibold text-ink;
 }
 
 .visual-editor .selectedCell {

@@ -100,10 +100,10 @@ defineExpose({ reset });
     <div>
         <input type="hidden" name="cf-turnstile-response" :value="token" />
         <div ref="container" />
-        <p v-if="isUnavailable" class="mt-1 text-sm text-red-600">
+        <p v-if="isUnavailable" class="mt-1 text-sm text-danger">
             The security check could not load. Refresh the page and try again.
         </p>
-        <p v-else-if="error" class="mt-1 text-sm text-red-600">
+        <p v-else-if="error" class="mt-1 text-sm text-danger">
             {{ error }}
         </p>
     </div>

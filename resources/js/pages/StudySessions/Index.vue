@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Form, Link, router } from '@inertiajs/vue3';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import FormField from '@/components/FormField.vue';
 import FormSelect from '@/components/FormSelect.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import PaginationLinks from '@/components/PaginationLinks.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Paginated } from '@/types/course';
 
@@ -23,38 +26,100 @@ function deleteSession(id: number): void {
 
 <template>
     <AppLayout title="Study sessions">
-        <p class="mb-6 text-sm text-gray-600">Record time you have studied. <Link href="/dashboard" class="text-brand underline">See this week's total on your dashboard.</Link></p>
-        <section class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-            <h2 class="mb-4 text-lg font-semibold">Log study time</h2>
-            <Form action="/study-sessions" method="get" class="mb-5 flex flex-wrap items-end gap-3">
-                <div class="min-w-0 flex-1"><FormField label="Find a lesson (optional)" name="lesson_search" :value="lesson_search" :required="false" /></div>
-                <button type="submit" class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-brand">Find</button>
-            </Form>
-            <Form action="/study-sessions" method="post" reset-on-success #default="{ errors, processing }" class="grid gap-4 sm:grid-cols-2">
-                <FormField label="Study date" name="studied_on" type="date" :value="today" :error="errors.studied_on" />
-                <FormField label="Minutes (1–1,440)" name="minutes" type="number" :error="errors.minutes" />
-                <div class="sm:col-span-2">
-                    <FormSelect label="Related lesson" name="lesson_id" :error="errors.lesson_id" :options="[{ value: '', label: 'No related lesson' }, ...lessons.data.map(lesson => ({ value: String(lesson.id), label: lesson.title }))]" />
-                    <p class="mt-2 text-xs text-gray-500">Showing {{ lessons.data.length }} of {{ lessons.meta.total }} lessons. Search or change page to find another lesson.</p>
-                    <PaginationLinks :pagination="lessons" />
-                </div>
-                <div class="sm:col-span-2"><ShimmerButton type="submit" :disabled="processing">{{ processing ? 'Saving…' : 'Record session' }}</ShimmerButton></div>
-            </Form>
-        </section>
-        <section class="rounded-2xl border border-gray-200 bg-white p-6">
-            <h2 class="mb-4 text-lg font-semibold">Study history</h2>
-            <p v-if="sessions.data.length === 0" class="text-sm text-gray-600">No study sessions yet. Record your first session above.</p>
-            <ul v-else class="divide-y divide-gray-200">
-                <li v-for="session in sessions.data" :key="session.id" class="flex flex-wrap items-center justify-between gap-3 py-4">
-                    <div class="min-w-0">
-                        <p class="font-medium">{{ session.studied_on }} · {{ session.minutes }} minutes</p>
-                        <Link v-if="session.lesson" :href="`/courses/${session.lesson.course_id}/lessons/${session.lesson.id}`" class="text-sm wrap-anywhere text-brand hover:underline">{{ session.lesson.title }}</Link>
-                        <p v-else class="text-sm text-gray-500">No related lesson</p>
+        <template #heading>
+            <PageHeader title="Study sessions">
+                <template #meta>
+                    Record time you have studied.
+                    <Link href="/dashboard" class="rounded font-medium text-brand underline underline-offset-4">
+                        See this week’s total on your dashboard.
+                    </Link>
+                </template>
+            </PageHeader>
+        </template>
+
+        <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+            <AppCard as="section" aria-labelledby="log-heading" class="min-w-0 p-6">
+                <h2 id="log-heading" class="mb-4 font-serif text-xl font-medium tracking-tight text-ink">Log study time</h2>
+                <Form action="/study-sessions" method="get" class="mb-5 flex items-end gap-2 border-b border-line pb-5">
+                    <div class="min-w-0 flex-1">
+                        <FormField label="Find a lesson (optional)" name="lesson_search" :value="lesson_search" :required="false" />
                     </div>
-                    <button type="button" :aria-label="`Delete session from ${session.studied_on}, ${session.minutes} minutes`" class="rounded px-2 py-1 text-sm text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600" @click="deleteSession(session.id)">Delete</button>
-                </li>
-            </ul>
-            <PaginationLinks :pagination="sessions" />
-        </section>
+                    <AppButton type="submit" variant="secondary">Find</AppButton>
+                </Form>
+                <Form
+                    action="/study-sessions"
+                    method="post"
+                    reset-on-success
+                    #default="{ errors, processing }"
+                    class="grid gap-4 sm:grid-cols-2"
+                >
+                    <FormField label="Study date" name="studied_on" type="date" :value="today" :error="errors.studied_on" />
+                    <FormField label="Minutes (1–1,440)" name="minutes" type="number" :error="errors.minutes" />
+                    <div class="sm:col-span-2">
+                        <FormSelect
+                            label="Related lesson"
+                            name="lesson_id"
+                            :error="errors.lesson_id"
+                            :options="[
+                                { value: '', label: 'No related lesson' },
+                                ...lessons.data.map((lesson) => ({ value: String(lesson.id), label: lesson.title })),
+                            ]"
+                        />
+                        <p class="mt-2 text-xs text-ink-faint">
+                            Showing {{ lessons.data.length }} of {{ lessons.meta.total }} lessons. Search or change page to
+                            find another lesson.
+                        </p>
+                        <PaginationLinks :pagination="lessons" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <AppButton type="submit" :disabled="processing">
+                            {{ processing ? 'Saving…' : 'Record session' }}
+                        </AppButton>
+                    </div>
+                </Form>
+            </AppCard>
+
+            <section aria-labelledby="history-heading" class="min-w-0">
+                <h2 id="history-heading" class="mb-3 font-serif text-xl font-medium tracking-tight text-ink">Study history</h2>
+                <EmptyState
+                    v-if="sessions.data.length === 0"
+                    title="No study sessions yet"
+                    description="Record your first session with the form."
+                />
+                <AppCard v-else as="ul" class="divide-y divide-line">
+                    <li
+                        v-for="session in sessions.data"
+                        :key="session.id"
+                        class="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+                    >
+                        <div class="min-w-0 flex-1 basis-48">
+                            <p class="text-sm font-medium text-ink">{{ session.minutes }} minutes</p>
+                            <p class="mt-0.5 text-xs wrap-anywhere text-ink-faint">
+                                {{ session.studied_on }}
+                                <template v-if="session.lesson">
+                                    ·
+                                    <Link
+                                        :href="`/courses/${session.lesson.course_id}/lessons/${session.lesson.id}`"
+                                        class="rounded font-medium text-brand hover:underline"
+                                    >
+                                        {{ session.lesson.title }}
+                                    </Link>
+                                </template>
+                                <template v-else>· No related lesson</template>
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :aria-label="`Delete session from ${session.studied_on}, ${session.minutes} minutes`"
+                            class="cursor-pointer rounded-md px-2 py-1 text-sm text-danger transition-colors hover:bg-danger-soft"
+                            @click="deleteSession(session.id)"
+                        >
+                            Delete
+                        </button>
+                    </li>
+                </AppCard>
+                <PaginationLinks :pagination="sessions" />
+            </section>
+        </div>
     </AppLayout>
 </template>

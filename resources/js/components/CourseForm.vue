@@ -5,8 +5,8 @@ import { useTemplateRef } from 'vue';
 import FormField from '@/components/FormField.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import FormTextarea from '@/components/FormTextarea.vue';
-import MagicCard from '@/components/MagicCard.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import type { Course, StatusOption } from '@/types/course';
 
@@ -31,7 +31,7 @@ useUnsavedChanges(() =>
 </script>
 
 <template>
-    <MagicCard class="max-w-2xl p-6">
+    <AppCard class="max-w-2xl p-6">
         <Form
             ref="formRef"
             :action="action"
@@ -64,9 +64,9 @@ useUnsavedChanges(() =>
                 />
             </div>
 
-            <ShimmerButton type="submit" :disabled="processing">
+            <AppButton type="submit" :disabled="processing">
                 {{ processing ? 'Saving…' : submitLabel }}
-            </ShimmerButton>
+            </AppButton>
         </Form>
-    </MagicCard>
+    </AppCard>
 </template>

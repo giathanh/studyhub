@@ -23,7 +23,7 @@ const initials = computed(() => {
 <template>
     <span
         aria-hidden="true"
-        class="flex shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand to-brand-accent font-semibold text-white"
+        class="flex shrink-0 items-center justify-center rounded-full bg-ink font-semibold text-paper"
         :class="size === 'md' ? 'size-12 text-base' : 'size-8 text-xs'"
     >
         {{ initials }}

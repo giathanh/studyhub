@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
 import LessonForm from '@/components/LessonForm.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Course, StatusOption } from '@/types/course';
 
@@ -12,9 +12,10 @@ defineProps<{
 
 <template>
     <AppLayout title="New lesson">
-        <Link :href="`/courses/${course.data.id}`" class="mb-4 inline-block text-sm font-medium text-brand">
-            ← {{ course.data.title }}
-        </Link>
+        <template #heading>
+            <PageHeader title="New lesson" :back-href="`/courses/${course.data.id}`" :back-label="course.data.title" />
+        </template>
+
         <LessonForm
             :action="`/courses/${course.data.id}/lessons`"
             method="post"

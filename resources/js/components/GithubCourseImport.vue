@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useForm, useHttp } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import MagicCard from '@/components/MagicCard.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import AppButton from '@/components/AppButton.vue';
+import AppCard from '@/components/AppCard.vue';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 
 type Preview = { token: string; title: string; files: { path: string; size: number }[] };
@@ -49,49 +49,49 @@ function toggleGroup(paths: string[]): void {
 </script>
 
 <template>
-    <MagicCard class="mb-6 max-w-2xl p-6">
-        <h2 class="text-lg font-semibold text-gray-900">Import from GitHub</h2>
-        <p class="mt-1 text-sm text-gray-600">Paste a public repository link, then choose the Markdown files to import. Each import creates a new course.</p>
+    <AppCard class="mb-6 max-w-2xl p-6">
+        <h2 class="font-serif text-xl font-medium tracking-tight text-ink">Import from GitHub</h2>
+        <p class="mt-1 text-sm text-ink-soft">Paste a public repository link, then choose the Markdown files to import. Each import creates a new course.</p>
         <form class="mt-4 space-y-3" @submit.prevent="loadRepository">
-            <label for="repository-url" class="block text-sm font-medium text-gray-900">Repository URL</label>
+            <label for="repository-url" class="block text-sm font-medium text-ink">Repository URL</label>
             <input id="repository-url" v-model="lookup.repository_url" type="url" required
                 placeholder="https://github.com/owner/repository" :disabled="lookup.processing || form.processing"
                 :aria-invalid="lookup.errors.repository_url ? 'true' : undefined" aria-describedby="repository-error"
-                class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand focus:outline-none" />
-            <p v-if="lookup.errors.repository_url || networkError" id="repository-error" role="alert" class="text-sm text-red-600">{{ lookup.errors.repository_url || networkError }}</p>
-            <ShimmerButton type="submit" :disabled="lookup.processing || form.processing">
+                class="control" />
+            <p v-if="lookup.errors.repository_url || networkError" id="repository-error" role="alert" class="text-sm text-danger">{{ lookup.errors.repository_url || networkError }}</p>
+            <AppButton type="submit" :disabled="lookup.processing || form.processing">
                 {{ lookup.processing ? 'Loading repository…' : 'Load repository' }}
-            </ShimmerButton>
+            </AppButton>
         </form>
-        <p v-if="preview" class="mt-4 break-all text-sm text-gray-500">Loaded: {{ loadedRepository }}</p>
+        <p v-if="preview" class="mt-4 break-all text-sm text-ink-faint">Loaded: {{ loadedRepository }}</p>
         <form v-if="preview" class="mt-5 space-y-4" @submit.prevent="form.post('/courses/import/github')">
             <div>
-                <label for="github-course-title" class="block text-sm font-medium text-gray-900">Course title</label>
+                <label for="github-course-title" class="block text-sm font-medium text-ink">Course title</label>
                 <input id="github-course-title" v-model="form.title" maxlength="255" :disabled="form.processing"
-                    class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand focus:outline-none" />
+                    class="control mt-1" />
             </div>
-            <p aria-live="polite" class="text-sm text-gray-600">{{ form.paths.length }} of {{ preview.files.length }} files selected · {{ (selectedBytes / 1024 / 1024).toFixed(2) }} / 7 MB</p>
-            <p class="text-sm text-gray-500">Folders become sections. Each file becomes a lesson; a single file splits at H2 headings. Preview expires after 30 minutes.</p>
-            <fieldset :disabled="form.processing" class="max-h-80 space-y-3 overflow-y-auto rounded-lg border border-gray-200 p-3">
+            <p aria-live="polite" class="text-sm text-ink-soft">{{ form.paths.length }} of {{ preview.files.length }} files selected · {{ (selectedBytes / 1024 / 1024).toFixed(2) }} / 7 MB</p>
+            <p class="text-sm text-ink-faint">Folders become sections. Each file becomes a lesson; a single file splits at H2 headings. Preview expires after 30 minutes.</p>
+            <fieldset :disabled="form.processing" class="max-h-80 space-y-3 overflow-y-auto rounded-lg border border-line p-3">
                 <legend class="sr-only">Choose Markdown files</legend>
                 <details v-for="group in groups" :key="group.name" class="text-sm">
-                    <summary class="cursor-pointer break-all py-1 font-medium text-gray-900">{{ group.name }} ({{ group.files.length }})</summary>
+                    <summary class="cursor-pointer break-all py-1 font-medium text-ink">{{ group.name }} ({{ group.files.length }})</summary>
                     <button type="button" class="my-2 rounded text-brand underline focus-visible:outline-2" @click="toggleGroup(group.files.map((file) => file.path))">
                         {{ group.files.every((file) => form.paths.includes(file.path)) ? 'Deselect folder' : 'Select folder' }}
                     </button>
-                    <label v-for="file in group.files" :key="file.path" class="flex items-start gap-2 py-1.5 text-gray-700">
+                    <label v-for="file in group.files" :key="file.path" class="flex items-start gap-2 py-1.5 text-ink-soft">
                         <input v-model="form.paths" type="checkbox" :value="file.path" class="mt-0.5 shrink-0 accent-brand" />
                         <span class="min-w-0 break-all">{{ file.path }}</span>
                     </label>
                 </details>
             </fieldset>
-            <ul v-if="errors.length" role="alert" class="space-y-1 text-sm text-red-600">
+            <ul v-if="errors.length" role="alert" class="space-y-1 text-sm text-danger">
                 <li v-for="error in errors" :key="error">{{ error }}</li>
             </ul>
-            <p v-if="selectedBytes > 7 * 1024 * 1024" role="alert" class="text-sm text-red-600">Choose fewer files to stay within 7 MB.</p>
-            <ShimmerButton type="submit" :disabled="form.processing || form.paths.length === 0 || selectedBytes > 7 * 1024 * 1024">
+            <p v-if="selectedBytes > 7 * 1024 * 1024" role="alert" class="text-sm text-danger">Choose fewer files to stay within 7 MB.</p>
+            <AppButton type="submit" :disabled="form.processing || form.paths.length === 0 || selectedBytes > 7 * 1024 * 1024">
                 {{ form.processing ? 'Importing from GitHub…' : 'Import selected files' }}
-            </ShimmerButton>
+            </AppButton>
         </form>
-    </MagicCard>
+    </AppCard>
 </template>

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, useTemplateRef } from 'vue';
-import AnimatedGridPattern from '@/components/AnimatedGridPattern.vue';
-import AuroraText from '@/components/AuroraText.vue';
-import BlurFade from '@/components/BlurFade.vue';
+import BrandMark from '@/components/BrandMark.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import ScrollToTopButton from '@/components/ScrollToTopButton.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
 
@@ -34,13 +33,9 @@ const navigationLinks = [
         label: 'Study sessions',
         iconPath: 'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
     },
-    {
-        href: '/settings/password',
-        label: 'Change password',
-        iconPath:
-            'M7 11V8a5 5 0 0 1 10 0v3M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z',
-    },
 ];
+
+const passwordLinkHref = '/settings/password';
 
 const page = usePage();
 const userName = computed(() => page.props.auth.user?.name ?? '');
@@ -78,23 +73,14 @@ async function hideSidebar(): Promise<void> {
 
 <template>
     <div
-        class="relative isolate min-h-screen overflow-x-clip bg-gray-50 transition-[padding] duration-200 motion-reduce:transition-none"
-        :class="{ 'lg:pl-64': !isSidebarHidden }"
+        class="min-h-screen overflow-x-clip bg-paper transition-[padding] duration-200 motion-reduce:transition-none"
+        :class="{ 'lg:pl-60': !isSidebarHidden }"
         @keydown.esc="isSidebarOpen = false"
     >
         <Head :title="title" />
 
-        <div class="absolute inset-x-0 top-0 -z-10 h-120 overflow-hidden">
-            <AnimatedGridPattern
-                class="text-brand mask-[radial-gradient(ellipse_70%_100%_at_top,white,transparent)]"
-                :num-squares="30"
-                :max-opacity="0.3"
-                :duration="3"
-            />
-        </div>
-
         <header
-            class="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-200/70 bg-white/70 px-4 py-3 backdrop-blur-md"
+            class="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-paper px-4 py-3"
             :class="{ 'lg:hidden': !isSidebarHidden }"
         >
             <button
@@ -103,7 +89,7 @@ async function hideSidebar(): Promise<void> {
                 aria-label="Show menu"
                 aria-controls="app-sidebar"
                 :aria-expanded="isSidebarOpen"
-                class="cursor-pointer rounded-lg p-1.5 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                class="cursor-pointer rounded-lg p-1.5 text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
                 @click="showSidebar"
             >
                 <svg
@@ -118,8 +104,8 @@ async function hideSidebar(): Promise<void> {
                     <path d="M4 7h16M4 12h16M4 17h16" />
                 </svg>
             </button>
-            <Link href="/dashboard" class="text-lg font-semibold tracking-tight">
-                <AuroraText>StudyHub</AuroraText>
+            <Link href="/dashboard" class="rounded text-xl">
+                <BrandMark />
             </Link>
         </header>
 
@@ -127,13 +113,13 @@ async function hideSidebar(): Promise<void> {
             v-if="isSidebarOpen"
             type="button"
             aria-label="Close menu"
-            class="fixed inset-0 z-20 cursor-default bg-gray-900/30 lg:hidden"
+            class="fixed inset-0 z-20 cursor-default bg-ink/30 lg:hidden"
             @click="isSidebarOpen = false"
         />
 
         <aside
             id="app-sidebar"
-            class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/70 bg-white/90 backdrop-blur-md transition-transform duration-200 motion-reduce:transition-none"
+            class="fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-line bg-surface transition-transform duration-200 motion-reduce:transition-none"
             :class="[
                 isSidebarOpen ? 'translate-x-0' : 'invisible -translate-x-full',
                 isSidebarHidden
@@ -141,19 +127,16 @@ async function hideSidebar(): Promise<void> {
                     : 'lg:visible lg:translate-x-0',
             ]"
         >
-            <div class="flex items-center justify-between py-5 pr-3 pl-6">
-                <Link
-                    href="/dashboard"
-                    class="rounded-md text-xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                >
-                    <AuroraText>StudyHub</AuroraText>
+            <div class="flex items-center justify-between py-5 pr-3 pl-5">
+                <Link href="/dashboard" class="rounded text-2xl">
+                    <BrandMark />
                 </Link>
                 <button
                     ref="hideMenuButton"
                     type="button"
                     aria-label="Hide menu"
                     aria-controls="app-sidebar"
-                    class="cursor-pointer rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    class="cursor-pointer rounded-lg p-1.5 text-ink-faint transition-colors hover:bg-sunken hover:text-ink"
                     @click="hideSidebar"
                 >
                     <svg
@@ -171,13 +154,13 @@ async function hideSidebar(): Promise<void> {
                 </button>
             </div>
 
-            <nav aria-label="Main" class="flex flex-1 flex-col gap-1 overflow-y-auto px-3 text-sm">
+            <nav aria-label="Main" class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-1 text-sm">
                 <Link
                     v-for="link in navigationLinks"
                     :key="link.href"
                     :href="link.href"
                     :aria-current="isCurrentLink(link.href) ? 'page' : undefined"
-                    class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand aria-[current=page]:bg-brand/10 aria-[current=page]:text-brand"
+                    class="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-ink-soft transition-colors hover:bg-sunken hover:text-ink aria-[current=page]:bg-highlight aria-[current=page]:text-ink"
                 >
                     <svg
                         aria-hidden="true"
@@ -195,40 +178,45 @@ async function hideSidebar(): Promise<void> {
                 </Link>
             </nav>
 
-            <div class="flex flex-col gap-3 border-t border-gray-200/70 p-4 text-sm">
+            <div class="flex flex-col gap-3 border-t border-line p-4 text-sm">
                 <div class="flex min-w-0 items-center gap-3">
                     <UserAvatar :name="userName" />
-                    <span class="truncate font-medium text-gray-900">{{ userName }}</span>
+                    <span class="truncate font-medium text-ink">{{ userName }}</span>
                 </div>
-                <Link
-                    href="/logout"
-                    method="post"
-                    as="button"
-                    class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                >
-                    Log out
-                </Link>
+                <div class="flex items-center justify-between gap-2">
+                    <Link
+                        :href="passwordLinkHref"
+                        :aria-current="isCurrentLink(passwordLinkHref) ? 'page' : undefined"
+                        class="rounded text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline aria-[current=page]:font-medium aria-[current=page]:text-ink"
+                    >
+                        Change password
+                    </Link>
+                    <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        class="-mr-2 cursor-pointer rounded-lg px-2 py-1 font-medium text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
+                    >
+                        Log out
+                    </Link>
+                </div>
             </div>
         </aside>
 
-        <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-            <BlurFade>
-                <p
-                    v-if="successMessage"
-                    role="status"
-                    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
-                >
-                    {{ successMessage }}
-                </p>
+        <main class="mx-auto max-w-6xl animate-page-in px-4 py-8 motion-reduce:animate-none sm:px-6 sm:py-10 lg:px-10">
+            <p
+                v-if="successMessage"
+                role="status"
+                class="mb-6 rounded-lg bg-success-soft px-4 py-2.5 text-sm font-medium text-success"
+            >
+                {{ successMessage }}
+            </p>
 
-                <slot name="heading">
-                    <h1 class="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-                        {{ title }}
-                    </h1>
-                </slot>
+            <slot name="heading">
+                <PageHeader :title="title" />
+            </slot>
 
-                <slot />
-            </BlurFade>
+            <slot />
         </main>
 
         <ScrollToTopButton />

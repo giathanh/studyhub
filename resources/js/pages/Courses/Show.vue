@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import MagicCard from '@/components/MagicCard.vue';
+import AppButton from '@/components/AppButton.vue';
+import EmptyState from '@/components/EmptyState.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import PaginationLinks from '@/components/PaginationLinks.vue';
-import ShimmerButton from '@/components/ShimmerButton.vue';
+import ProgressBar from '@/components/ProgressBar.vue';
+import StatusBadge from '@/components/StatusBadge.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Course, Lesson, Paginated, StatusOption } from '@/types/course';
 
@@ -43,14 +46,8 @@ const lessonCountLabel = computed(
     () => `${course.value.lessons_count} ${course.value.lessons_count === 1 ? 'lesson' : 'lessons'}`,
 );
 
-const secondaryButtonClass =
-    'cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
-
-const dangerButtonClass =
-    'cursor-pointer rounded-lg border border-red-600 bg-red-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-red-700 hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600';
-
 const moveButtonClass =
-    'cursor-pointer rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-40';
+    'flex size-7 cursor-pointer items-center justify-center rounded-md text-sm text-ink-soft transition-colors hover:bg-sunken hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent';
 
 function isFirstLesson(lessonId: number): boolean {
     return props.lessons.meta.current_page === 1 && (lessonIndexById.value.get(lessonId) ?? 0) === 0;
@@ -91,86 +88,73 @@ function deleteCourse(): void {
 <template>
     <AppLayout :title="course.title">
         <template #heading>
-            <Link href="/courses" class="text-sm font-medium text-brand">← Courses</Link>
-            <div class="mt-2 mb-6 flex flex-wrap items-start justify-between gap-3">
-                <div class="min-w-0">
-                    <h1 class="text-2xl font-semibold tracking-tight wrap-anywhere text-gray-900">
-                        {{ course.title }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500">
-                        {{ course.completed_lessons_count ?? 0 }}/{{ course.lessons_count ?? 0 }} completed ({{
-                            course.progress ?? 0
-                        }}%) · {{ course.status_label }}
-                        <template v-if="course.target_date">· Target: {{ course.target_date }}</template>
-                    </p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <Link
-                        :href="`/notes/create?course_id=${course.id}`"
-                        :class="[secondaryButtonClass, 'text-gray-700']"
-                    >
+            <PageHeader :title="course.title" back-href="/courses" back-label="Courses">
+                <template #meta>
+                    <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <StatusBadge :status="course.status" :label="course.status_label" />
+                        <span v-if="course.target_date">Target: {{ course.target_date }}</span>
+                    </span>
+                </template>
+                <template #actions>
+                    <AppButton :as="Link" :href="`/notes/create?course_id=${course.id}`" variant="secondary">
                         New note
-                    </Link>
-                    <Link :href="`/courses/${course.id}/edit`" :class="[secondaryButtonClass, 'text-gray-700']">
-                        Edit
-                    </Link>
-                    <button type="button" :class="dangerButtonClass" @click="deleteCourse">
-                        Delete
-                    </button>
-                    <ShimmerButton :as="Link" :href="`/courses/${course.id}/lessons/create`">
-                        Add lesson
-                    </ShimmerButton>
-                </div>
-            </div>
+                    </AppButton>
+                    <AppButton :as="Link" :href="`/courses/${course.id}/edit`" variant="secondary">Edit</AppButton>
+                    <AppButton type="button" variant="danger" @click="deleteCourse">Delete</AppButton>
+                    <AppButton :as="Link" :href="`/courses/${course.id}/lessons/create`">Add lesson</AppButton>
+                </template>
+            </PageHeader>
         </template>
 
-        <div class="mb-6">
-            <div
-                class="h-2 w-full overflow-hidden rounded-full bg-gray-200"
-                role="progressbar"
-                :aria-valuenow="course.progress ?? 0"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-label="Course progress"
-            >
-                <div
-                    class="h-full rounded-full bg-brand transition-[width] duration-300"
-                    :style="{ width: `${course.progress ?? 0}%` }"
-                />
-            </div>
-        </div>
-
-        <p v-if="course.description" class="mb-6 max-w-3xl whitespace-pre-line text-gray-600">
+        <p v-if="course.description" class="mb-6 max-w-3xl whitespace-pre-line text-ink-soft">
             {{ course.description }}
         </p>
 
-        <MagicCard v-if="lessons.data.length === 0" class="p-10 text-center">
-            <h2 class="font-semibold text-gray-900">No lessons yet</h2>
-            <p class="mt-1 text-sm text-gray-600">Add the first lesson to start filling this course.</p>
-        </MagicCard>
+        <div class="mb-8 max-w-3xl">
+            <p class="mb-2 flex justify-between gap-3 text-sm text-ink-soft">
+                <span>{{ course.completed_lessons_count ?? 0 }} of {{ lessonCountLabel }} completed</span>
+                <span class="font-medium text-ink">{{ course.progress ?? 0 }}%</span>
+            </p>
+            <ProgressBar :value="course.progress ?? 0" label="Course progress" size="md" />
+        </div>
 
-        <div v-else class="space-y-6">
+        <EmptyState
+            v-if="lessons.data.length === 0"
+            title="No lessons yet"
+            description="Add the first lesson to start filling this course."
+        />
+
+        <div v-else class="flex flex-col gap-8">
             <section v-for="group in lessonGroups" :key="group.key">
-                <h2 v-if="group.section" class="mb-2 text-sm font-semibold text-gray-900">
+                <h2 v-if="group.section" class="mb-2 font-serif text-xl font-medium tracking-tight text-ink">
                     {{ group.section }}
                 </h2>
-                <ul class="divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-white">
+                <ul class="divide-y divide-line rounded-xl border border-line bg-surface">
                     <li
                         v-for="lesson in group.lessons"
                         :key="lesson.id"
-                        class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm"
+                        class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2.5 text-sm"
                     >
+                        <span
+                            aria-hidden="true"
+                            class="size-2.5 shrink-0 rounded-full"
+                            :class="{
+                                'bg-success': lesson.status === 'completed',
+                                'bg-highlight ring-1 ring-warning-line': lesson.status === 'in_progress',
+                                'border border-line-strong': lesson.status === 'not_started',
+                            }"
+                        />
                         <Link
                             :href="`/courses/${course.id}/lessons/${lesson.id}`"
-                            class="min-w-0 flex-1 font-medium wrap-anywhere text-gray-900 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                            class="min-w-0 flex-1 basis-48 rounded font-medium wrap-anywhere text-ink hover:text-brand"
                         >
                             {{ lesson.title }}
                         </Link>
-                        <div class="flex shrink-0 items-center gap-2">
+                        <div class="flex shrink-0 items-center gap-1">
                             <select
                                 :aria-label="`Status for ${lesson.title}`"
                                 :value="lesson.status"
-                                class="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none"
+                                class="mr-1 cursor-pointer rounded-md border border-line bg-surface px-2 py-1 text-xs font-medium text-ink-soft transition-colors hover:border-line-strong focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none"
                                 @change="changeLessonStatus(lesson.id, ($event.target as HTMLSelectElement).value)"
                             >
                                 <option v-for="option in statuses" :key="option.value" :value="option.value">
