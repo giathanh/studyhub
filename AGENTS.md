@@ -9,7 +9,7 @@ Project decisions. Where these conflict with generic framework guidance in this 
 
 - Inertia monolith: Laravel owns routing, validation, and authorization; Vue renders pages. Do not add `routes/api.php`, vue-router, Pinia, or axios unless the user asks.
 - TypeScript on the frontend (`<script setup lang="ts">`, strict mode). PHPUnit, not Pest. Do not migrate away from either on your own.
-- Authentication is Laravel Fortify with Inertia pages. Enabled features: registration and password update. Do not enable other Fortify features unless the user asks.
+- Authentication is Laravel Fortify with Inertia pages. Enabled features: registration, profile information update, and password update. Do not enable other Fortify features unless the user asks.
 - Ask before adding any Composer or npm dependency.
 
 ## Environment (Lerd)
